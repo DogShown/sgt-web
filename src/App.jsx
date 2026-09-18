@@ -1,11 +1,23 @@
-import { Login } from './components/Login';
+import React, { useState } from 'react';
+import Login from './components/Login';
+import Dashboard from './components/Dashboard';
 
-function App() {
+export default function App() {
+  const [logado, setLogado] = useState(!!localStorage.getItem('sgt_token'));
+
+  const handleLogout = () => {
+    localStorage.removeItem('sgt_token');
+    localStorage.removeItem('sgt_user');
+    setLogado(false);
+  };
+
   return (
     <div>
-      <Login />
+      {logado ? (
+        <Dashboard onLogout={handleLogout} />
+      ) : (
+        <Login onLoginSucesso={() => setLogado(true)} />
+      )}
     </div>
   );
 }
-
-export default App;

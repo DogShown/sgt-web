@@ -1,68 +1,76 @@
-import { useState } from 'react';
-import { login } from '../services/loginService';
+import React, { useState } from 'react';
+import { loginService } from '../services/loginServices';
 
-export function Login() {
+export default function Login({ onLoginSucesso }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [mensagem, setMensagem] = useState('');
+  const [erro, setErro] = useState('');
   const [carregando, setCarregando] = useState(false);
 
-  const handleLogin = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setMensagem('');
+    setErro('');
     setCarregando(true);
 
     try {
-      const usuario = await login(email, senha);
-      setMensagem(`Bem-vindo, ${usuario.nome || 'usuário'}!`);
-      console.log('Dados do usuário:', usuario);
-    } catch (error) {
-      if (error.response) {
-        setMensagem(error.response.data.message || 'E-mail ou senha incorretos.');
-      } else {
-        setMensagem('Não foi possível conectar ao servidor.');
+      const data = await loginService.login(email, senha);
+      
+      // Armazena a sessão do usuário no navegador
+      localStorage.setItem('sgt_token', data.token);
+      localStorage.setItem('sgt_user', JSON.stringify(data));
+
+      alert(`Bem-vindo(a), ${data.nome} (Turma: ${data.turma})!`);
+      
+      if (onLoginSucesso) {
+        onLoginSucesso();
       }
-      console.error('Erro de autenticação:', error);
+    } catch (err) {
+      setErro(err.response?.data?.message || 'E-mail ou senha inválidos.');
     } finally {
       setCarregando(false);
     }
   };
 
   return (
-    <div style={{ maxWidth: '350px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      <h2>Login - SGT</h2>
+    <div style={styles.container}>
+      <h2>SGT - Entrar</h2>
+      {erro && <p style={styles.erro}>{erro}</p>}
       
-      <form onSubmit={handleLogin}>
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="email" style={{ display: 'block', marginBottom: '5px' }}>E-mail:</label>
-          <input 
-            id="email"
-            type="email" 
-            value={email} 
-            onChange={(e) => setEmail(e.target.value)} 
+      <form onSubmit={handleSubmit}>
+        <div style={styles.campo}>
+          <label>E-mail institucional:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+            style={styles.input}
           />
         </div>
 
-        <div style={{ marginBottom: '15px' }}>
-          <label htmlFor="senha" style={{ display: 'block', marginBottom: '5px' }}>Senha:</label>
-          <input 
-            id="senha"
-            type="password" 
-            value={senha} 
-            onChange={(e) => setSenha(e.target.value)} 
+        <div style={styles.campo}>
+          <label>Senha:</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
             required
-            style={{ width: '100%', padding: '8px', boxSizing: 'border-box' }}
+            style={styles.input}
           />
         </div>
 
-        <button type="submit" disabled={carregando} style={{ width: '100%', padding: '10px', cursor: 'pointer' }}>
+        <button type="submit" disabled={carregando} style={styles.botao}>
           {carregando ? 'Entrando...' : 'Entrar'}
         </button>
       </form>
-
-      {mensagem && <p style={{ marginTop: '15px', textAlign: 'center' }}>{mensagem}</p>}
     </div>
   );
 }
+
+const styles = {
+  container: { maxWidth: '400px', margin: '60px auto', padding: '24px', border: '1px solid #ddd', borderRadius: '8px' },
+  campo: { marginBottom: '16px' },
+  input: { width: '100%', padding: '10px', marginTop: '6px', boxSizing: 'border-box' },
+  botao: { width: '100%', padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
+  erro: { color: 'red', marginBottom: '12px' }
+};

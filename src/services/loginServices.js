@@ -1,15 +1,16 @@
 import api from './api';
-import loginService from '../services/loginService.js'; // ou .jsx / .ts
 
-export const login = async (email, senha) => {
-  const response = await api.post('/usuarios/login', { 
-    email, 
-    senha 
-  });
-  
-  if (response.data) {
-    localStorage.setItem('usuario_logado', JSON.stringify(response.data));
+export const loginService = {
+  // Autentica no endpoint do AuthController (/api/auth/login)
+  login: async (email, senha) => {
+    const response = await api.post('/auth/login', { email, senha });
+    return response.data; // Devolve { token, id, nome, email, turma }
+  },
+
+  // Cadastra novos usuários (/api/usuarios/cadastrar)
+  cadastrar: async (dadosUsuario) => {
+    // dadosUsuario: { nome, email, senha, turma }
+    const response = await api.post('/usuarios/cadastrar', dadosUsuario);
+    return response.data;
   }
-  
-  return response.data;
 };
