@@ -1,76 +1,180 @@
 import React, { useState } from 'react';
-import { loginService } from '../services/loginServices';
+import axios from 'axios';
 
-export default function Login({ onLoginSucesso }) {
+const Login = () => {
+  // Estado para alternar entre Login (false) e Cadastro (true)
+  const [isRegister, setIsRegister] = useState(false);
+
+  // Estados dos campos do formulário
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
+  const [turma, setTurma] = useState('');
+
+  // Mensagens de feedback
+  const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
-  const [carregando, setCarregando] = useState(false);
+
+  const limparCampos = () => {
+    setNome('');
+    setEmail('');
+    setSenha('');
+    setTurma('');
+    setMensagem('');
+    setErro('');
+  };
+
+  const handleToggle = (modoCadastro) => {
+    setIsRegister(modoCadastro);
+    limparCampos();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMensagem('');
     setErro('');
-    setCarregando(true);
 
-    try {
-      const data = await loginService.login(email, senha);
-      
-      // Armazena a sessão do usuário no navegador
-      localStorage.setItem('sgt_token', data.token);
-      localStorage.setItem('sgt_user', JSON.stringify(data));
-
-      alert(`Bem-vindo(a), ${data.nome} (Turma: ${data.turma})!`);
-      
-      if (onLoginSucesso) {
-        onLoginSucesso();
+    if (isRegister) {
+      // Requisição de CADASTRO -> POST /api/auth/cadastrar
+      try {
+        await axios.post('http://localhost:8080/api/auth/cadastrar', {
+          nome,
+          email,
+          senha,
+          turma
+        });
+        setMensagem('Cadastro realizado com sucesso! Faça login para continuar.');
+        setIsRegister(false); // Alterna para a aba de login após o cadastro
+      } catch (err) {
+        setErro(err.response?.data || 'Erro ao realizar cadastro. Verifique os dados.');
       }
-    } catch (err) {
-      setErro(err.response?.data?.message || 'E-mail ou senha inválidos.');
-    } finally {
-      setCarregando(false);
+    } else {
+      // Requisição de LOGIN -> POST /api/auth/login
+      try {
+        const response = await axios.post('http://localhost:8080/api/auth/login', {
+          email,
+          senha
+        });
+        setMensagem(`Bem-vindo, ${response.data.nome}!`);
+        // Armazena o token e/ou dados do usuário no localStorage
+        localStorage.setItem('usuario', JSON.stringify(response.data));
+      } catch (err) {
+        setErro('E-mail ou senha inválidos.');
+      }
     }
   };
 
   return (
-    <div style={styles.container}>
-      <h2>SGT - Entrar</h2>
-      {erro && <p style={styles.erro}>{erro}</p>}
-      
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+      {/* Botões de Alternância de Aba */}
+      <div style={{ display: 'flex', marginBottom: '20px' }}>
+        <button
+          type="button"
+          onClick={() => handleToggle(false)}
+          style={{
+            flex: 1,
+            padding: '10px',
+            backgroundColor: !isRegister ? '#007bff' : '#e0e0e0',
+            color: !isRegister ? '#fff' : '#000',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          onClick={() => handleToggle(true)}
+          style={{
+            flex: 1,
+            padding: '10px',
+            backgroundColor: isRegister ? '#007bff' : '#e0e0e0',
+            color: isRegister ? '#fff' : '#000',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Cadastrar
+        </button>
+      </div>
+
+      <h2>{isRegister ? 'Criar Conta' : 'Acessar Conta'}</h2>
+
+      {mensagem && <p style={{ color: 'green' }}>{mensagem}</p>}
+      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+
       <form onSubmit={handleSubmit}>
-        <div style={styles.campo}>
-          <label>E-mail institucional:</label>
+        {/* Campo NOME (Apenas no cadastro) */}
+        {isRegister && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
+          </div>
+        )}
+
+        {/* Campo E-MAIL */}
+        <div style={{ marginBottom: '15px' }}>
+          <label>E-mail:</label>
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            style={styles.input}
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
 
-        <div style={styles.campo}>
+        {/* Campo SENHA */}
+        <div style={{ marginBottom: '15px' }}>
           <label>Senha:</label>
           <input
             type="password"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
             required
-            style={styles.input}
+            minLength={6}
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
           />
         </div>
 
-        <button type="submit" disabled={carregando} style={styles.botao}>
-          {carregando ? 'Entrando...' : 'Entrar'}
+        {/* Campo TURMA (Apenas no cadastro) */}
+        {isRegister && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>Turma:</label>
+            <input
+              type="text"
+              value={turma}
+              onChange={(e) => setTurma(e.target.value)}
+              required
+              placeholder="Ex: 3º Ano A"
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
+          </div>
+        )}
+
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#28a745',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          {isRegister ? 'Finalizar Cadastro' : 'Entrar'}
         </button>
       </form>
     </div>
   );
-}
-
-const styles = {
-  container: { maxWidth: '400px', margin: '60px auto', padding: '24px', border: '1px solid #ddd', borderRadius: '8px' },
-  campo: { marginBottom: '16px' },
-  input: { width: '100%', padding: '10px', marginTop: '6px', boxSizing: 'border-box' },
-  botao: { width: '100%', padding: '12px', backgroundColor: '#007bff', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' },
-  erro: { color: 'red', marginBottom: '12px' }
 };
+
+export default Login;
