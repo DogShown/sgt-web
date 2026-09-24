@@ -1,0 +1,227 @@
+/* Layout Principal da Tela Dividida */
+.login-wrapper {
+  display: flex;
+  min-height: 100vh;
+  width: 100vw;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #f4f7f9;
+}
+
+/* Painel Esquerdo (Azul Escuro Institucional) */
+.login-banner {
+  flex: 1;
+  background-color: #004d61;
+  color: #ffffff;
+  padding: 40px 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.brand-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  background-color: rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.brand-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: 0.5px;
+}
+
+.banner-content {
+  max-width: 480px;
+  margin: auto 0;
+}
+
+.banner-content h1 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.25;
+  margin-bottom: 24px;
+}
+
+.banner-description {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #cce3ea;
+  margin-bottom: 24px;
+}
+
+.banner-features {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.banner-features li {
+  font-size: 15px;
+  line-height: 1.8;
+  color: #e0f2f7;
+  display: flex;
+  align-items: center;
+}
+
+.banner-features li::before {
+  content: "•";
+  margin-right: 8px;
+  font-weight: bold;
+}
+
+.banner-footer {
+  font-size: 13px;
+  color: #a3cbd6;
+}
+
+/* Painel Direito (Formulário) */
+.login-form-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background-color: #f4f7f9;
+}
+
+.login-card-content {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-header {
+  margin-bottom: 28px;
+}
+
+.form-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #004d61;
+  margin: 0 0 8px 0;
+}
+
+.form-header p {
+  font-size: 14px;
+  color: #6b7280;
+  margin: 0;
+}
+
+/* Campos de Entrada */
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+.form-group input[type="email"],
+.form-group input[type="password"] {
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #1f2937;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #004d61;
+  box-shadow: 0 0 0 3px rgba(0, 77, 97, 0.1);
+}
+
+/* Opções de Login */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  font-size: 14px;
+}
+
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #4b5563;
+  cursor: pointer;
+}
+
+.forgot-link {
+  color: #004d61;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.forgot-link:hover {
+  text-decoration: underline;
+}
+
+/* Botão Entrar */
+.btn-submit {
+  width: 100%;
+  padding: 12px;
+  background-color: #004d61;
+  color: #ffffff;
+  border: none;
+  border-radius: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.btn-submit:hover {
+  background-color: #003644;
+}
+
+/* Link de Cadastro */
+.register-prompt {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.register-prompt a {
+  color: #004d61;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.register-prompt a:hover {
+  text-decoration: underline;
+}
+
+/* Responsividade para telas menores */
+@media (max-width: 850px) {
+  .login-wrapper {
+    flex-direction: column;
+  }
+  .login-banner {
+    padding: 30px;
+  }
+  .banner-content h1 {
+    font-size: 24px;
+  }
+}
