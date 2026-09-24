@@ -22,6 +22,7 @@ export const tarefaService = {
 
   // Exclui uma tarefa do sistema
   deletar: async (id) => {
-    await api.delete(`/tarefas/${id}`);
+    const response = await api.delete(`/tarefas/${id}`);
+    return response?.data;
   }
 };

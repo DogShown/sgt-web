@@ -5,6 +5,7 @@ import GerenciadorTarefas from './components/GerenciadorTarefas';
 
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [abaAtiva, setAbaAtiva] = useState('dashboard'); // 'dashboard' ou 'tarefas'
 
   // Verifica se o usuário já fez login previamente
   useEffect(() => {
@@ -27,34 +28,64 @@ export default function App() {
     setUsuarioLogado(null);
   };
 
-  return (
-    <div>
-      {!usuarioLogado ? (
-        /* Se não estiver logado, exibe a tela de Login */
-        <Login onLoginSucesso={handleLoginSucesso} />
-      ) : (
-        /* Se estiver logado, exibe o Dashboard, o Gerenciador de Tarefas e o botão de Sair */
-        <div>
-          <header style={styles.header}>
-            <span>Usuário: <strong>{usuarioLogado.nome}</strong></span>
-            <button onClick={handleLogout} style={styles.botaoSair}>Sair</button>
-          </header>
+  // Se não estiver logado, exibe apenas a tela de Login
+  if (!usuarioLogado) {
+    return <Login onLoginSucesso={handleLoginSucesso} />;
+  }
 
-          <main style={styles.conteudo}>
-            {/* Dashboard com as métricas */}
-            <Dashboard />
-            <hr style={{ margin: '30px 0' }} />
-            {/* CRUD completo de tarefas */}
-            <GerenciadorTarefas />
-          </main>
+  // Se estiver logado, exibe o layout completo com Sidebar e Conteúdo
+  return (
+    <div className="app-container">
+      {/* Barra Lateral (Sidebar) */}
+      <aside className="sidebar">
+        <div>
+          <div className="sidebar-header">
+            <h2>SGT</h2>
+          </div>
+
+          <ul className="sidebar-menu">
+            <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
+              <a 
+                href="#dashboard" 
+                onClick={(e) => { e.preventDefault(); setAbaAtiva('dashboard'); }}
+              >
+                Dashboard
+              </a>
+            </li>
+            <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
+              <a 
+                href="#tarefas" 
+                onClick={(e) => { e.preventDefault(); setAbaAtiva('tarefas'); }}
+              >
+                Gerenciador de Tarefas
+              </a>
+            </li>
+          </ul>
         </div>
-      )}
+
+        {/* Informações do Utilizador e Logout */}
+        <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '16px' }}>
+          <p style={{ fontSize: '0.85rem', color: 'var(--sidebar-text)', marginBottom: '8px' }}>
+            Usuário: <strong style={{ color: '#fff' }}>{usuarioLogado.nome || 'Utilizador'}</strong>
+          </p>
+          <button 
+            onClick={handleLogout} 
+            className="btn-primary" 
+            style={{ backgroundColor: 'var(--accent-red)', padding: '8px 12px', fontSize: '0.85rem' }}
+          >
+            Sair
+          </button>
+        </div>
+      </aside>
+
+      {/* Conteúdo Principal Alternável */}
+      <main className="main-content">
+        {abaAtiva === 'dashboard' ? (
+          <Dashboard />
+        ) : (
+          <GerenciadorTarefas />
+        )}
+      </main>
     </div>
   );
 }
-
-const styles = {
-  header: { display: 'flex', justifyContent: 'space-between', padding: '15px 30px', backgroundColor: '#f4f4f9', borderBottom: '1px solid #ddd' },
-  botaoSair: { backgroundColor: '#dc3545', color: '#fff', border: 'none', padding: '8px 12px', borderRadius: '4px', cursor: 'pointer' },
-  conteudo: { padding: '20px' }
-};

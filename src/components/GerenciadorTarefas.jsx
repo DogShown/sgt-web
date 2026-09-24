@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
 export default function GerenciadorTarefas() {
@@ -16,27 +16,36 @@ export default function GerenciadorTarefas() {
   // Recupera dados do usuário logado (armazenado no Login.jsx)
   const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
 
-  const carregarTarefas = async () => {
-    if (!usuario.id) return;
+  const carregarTarefas = useCallback(async () => {
+    if (!usuario || !usuario.id) {
+      setLoading(false);
+      return;
+    }
     try {
       setLoading(true);
+      setErro('');
       const dados = await tarefaService.listarPorUsuario(usuario.id);
-      setTarefas(dados);
+      setTarefas(dados || []);
     } catch (err) {
       setErro('Erro ao carregar a lista de tarefas.');
     } finally {
       setLoading(false);
     }
-  };
+  }, [usuario?.id]);
 
   useEffect(() => {
     carregarTarefas();
-  }, []);
+  }, [carregarTarefas]);
 
   // Enviar formulário (Criar Tarefa)
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
+
+    if (!usuario?.id) {
+      setErro('Sessão inválida. Faça login novamente.');
+      return;
+    }
 
     const novaTarefaDTO = {
       titulo,
@@ -52,6 +61,8 @@ export default function GerenciadorTarefas() {
       setTitulo('');
       setDescricao('');
       setDataEntrega('');
+      setCategoria('TRABALHO');
+      setPrioridade('MEDIA');
       carregarTarefas(); // Atualiza a lista
     } catch (err) {
       setErro(err.response?.data?.message || 'Erro ao criar a tarefa.');
@@ -61,6 +72,7 @@ export default function GerenciadorTarefas() {
   // Concluir Tarefa
   const handleConcluir = async (id) => {
     try {
+      setErro('');
       await tarefaService.concluir(id);
       carregarTarefas();
     } catch (err) {
@@ -72,6 +84,7 @@ export default function GerenciadorTarefas() {
   const handleDeletar = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
       try {
+        setErro('');
         await tarefaService.deletar(id);
         carregarTarefas();
       } catch (err) {
@@ -83,7 +96,7 @@ export default function GerenciadorTarefas() {
   return (
     <div style={{ maxWidth: '700px', margin: '20px auto', padding: '20px' }}>
       <h2>Gerenciador de Tarefas - SGT</h2>
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+      {erro && <p style={{ color: 'red', fontWeight: 'bold' }}>{erro}</p>}
 
       {/* Formulário de Criação */}
       <form onSubmit={handleSubmit} style={{ marginBottom: '30px', padding: '15px', border: '1px solid #ccc', borderRadius: '5px' }}>
@@ -152,25 +165,30 @@ export default function GerenciadorTarefas() {
       <h3>Minhas Tarefas</h3>
       {loading ? (
         <p>Carregando tarefas...</p>
+      ) : tarefas.length === 0 ? (
+        <p>Nenhuma tarefa encontrada.</p>
       ) : (
-        <ul>
-          {tarefas.map((t) => (
-            <li key={t.id} style={{ marginBottom: '15px', padding: '10px', borderBottom: '1px solid #eee' }}>
-              <strong>{t.titulo}</strong> - {t.categoria} | Prioridade: {t.prioridade} | Status: {t.statusConclusao}
-              <br />
-              <small>Entrega: {t.dataEntrega}</small>
-              <div style={{ marginTop: '5px' }}>
-                {!t.concluida && (
-                  <button onClick={() => handleConcluir(t.id)} style={{ marginRight: '10px' }}>
-                    Concluir
+        <ul style={{ listStyle: 'none', padding: 0 }}>
+          {tarefas.map((t) => {
+            const isConcluida = t.concluida || t.statusConclusao === 'CONCLUIDA';
+            return (
+              <li key={t.id} style={{ marginBottom: '15px', padding: '10px', borderBottom: '1px solid #eee' }}>
+                <strong>{t.titulo}</strong> - {t.categoria} | Prioridade: {t.prioridade} | Status: {t.statusConclusao || (isConcluida ? 'Concluída' : 'Pendente')}
+                <br />
+                <small>Entrega: {t.dataEntrega}</small>
+                <div style={{ marginTop: '5px' }}>
+                  {!isConcluida && (
+                    <button onClick={() => handleConcluir(t.id)} style={{ marginRight: '10px' }}>
+                      Concluir
+                    </button>
+                  )}
+                  <button onClick={() => handleDeletar(t.id)} style={{ color: 'red' }}>
+                    Excluir
                   </button>
-                )}
-                <button onClick={() => handleDeletar(t.id)} style={{ color: 'red' }}>
-                  Excluir
-                </button>
-              </div>
-            </li>
-          ))}
+                </div>
+              </li>
+            );
+          })}
         </ul>
       )}
     </div>
