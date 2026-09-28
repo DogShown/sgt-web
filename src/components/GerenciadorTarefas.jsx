@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
-export default function GerenciadorTarefas() {
+function GerenciadorTarefas() {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
@@ -39,8 +39,7 @@ export default function GerenciadorTarefas() {
       descricao,
       categoria,
       prioridade,
-      dataEntrega,
-      usuarioId: usuario.id
+      dataEntrega
     };
 
     try {
@@ -152,11 +151,11 @@ export default function GerenciadorTarefas() {
         <ul>
           {tarefas.map((t) => (
             <li key={t.id} style={{ marginBottom: '15px', padding: '10px', borderBottom: '1px solid #eee' }}>
-              <strong>{t.titulo}</strong> - {t.categoria} | Prioridade: {t.prioridade} | Status: {t.statusConclusao}
+              <strong>{t.titulo}</strong> - {t.categoria} | Prioridade: {t.prioridade} | Status: {t.status}
               <br />
               <small>Entrega: {t.dataEntrega}</small>
               <div style={{ marginTop: '5px' }}>
-                {!t.concluida && (
+                {!['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status) && (
                   <button onClick={() => handleConcluir(t.id)} style={{ marginRight: '10px' }}>
                     Concluir
                   </button>
@@ -172,3 +171,5 @@ export default function GerenciadorTarefas() {
     </div>
   );
 }
+
+export default GerenciadorTarefas;
