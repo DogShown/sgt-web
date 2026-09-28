@@ -1,99 +1,184 @@
 import React, { useState } from 'react';
-import './Login.css';
+import { loginService } from '../services/loginServices';
 
-export default function Login({ onLoginSucesso }) {
+const Login = ({ onLoginSucesso }) => {
+  const [isRegister, setIsRegister] = useState(false);
+  const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [lembrar, setLembrar] = useState(false);
+  const [turma, setTurma] = useState('');
+  const [mensagem, setMensagem] = useState('');
+  const [erro, setErro] = useState('');
 
-  const handleSubmit = (e) => {
+  const limparCampos = () => {
+    setNome('');
+    setEmail('');
+    setSenha('');
+    setTurma('');
+    setMensagem('');
+    setErro('');
+  };
+
+  const handleToggle = (modoCadastro) => {
+    setIsRegister(modoCadastro);
+    limparCampos();
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (onLoginSucesso) {
-      onLoginSucesso({ email, senha, lembrar });
+    setMensagem('');
+    setErro('');
+
+    if (isRegister) {
+      try {
+        await loginService.cadastrar({
+          nome,
+          email,
+          senha,
+          turma
+        });
+
+        setMensagem('Cadastro realizado com sucesso! Faça login para continuar.');
+        setIsRegister(false);
+        setSenha('');
+      } catch (err) {
+        setErro(
+          err.response?.data?.message ||
+          err.response?.data ||
+          'Erro ao realizar cadastro. Verifique os dados.'
+        );
+      }
+
+      return;
+    }
+
+    try {
+      const usuario = await loginService.login(email, senha);
+
+      localStorage.setItem('sgt_token', usuario.token);
+      localStorage.setItem('sgt_user', JSON.stringify({
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        turma: usuario.turma
+      }));
+
+      setMensagem(`Bem-vindo, ${usuario.nome}!`);
+      onLoginSucesso?.();
+    } catch (err) {
+      setErro(
+        err.response?.data?.message ||
+        'E-mail ou senha inválidos.'
+      );
     }
   };
 
   return (
-    <div className="login-wrapper">
-      {/* Painel Esquerdo */}
-      <div className="login-banner">
-        <div className="brand-header">
-          <div className="brand-icon">🎓</div>
-          <h2 className="brand-title">SGT</h2>
-        </div>
-
-        <div className="banner-content">
-          <h1>Suas tarefas acadêmicas, organizadas por prazo e prioridade.</h1>
-          <p className="banner-description">
-            Vinculação automática à turma, filtros semanais e mensais, chat da turma e do grupo de TCC, e um dashboard com a evolução do seu desempenho.
-          </p>
-          <ul className="banner-features">
-            <li>Controle de prazos e atrasos</li>
-            <li>Chats em tempo real</li>
-            <li>Sincronização web e mobile</li>
-          </ul>
-        </div>
-
-        <div className="banner-footer">
-          Acesso restrito aos dados da sua turma
-        </div>
+    <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
+      <div style={{ display: 'flex', marginBottom: '20px' }}>
+        <button
+          type="button"
+          onClick={() => handleToggle(false)}
+          style={{
+            flex: 1,
+            padding: '10px',
+            backgroundColor: !isRegister ? '#007bff' : '#e0e0e0',
+            color: !isRegister ? '#fff' : '#000',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Entrar
+        </button>
+        <button
+          type="button"
+          onClick={() => handleToggle(true)}
+          style={{
+            flex: 1,
+            padding: '10px',
+            backgroundColor: isRegister ? '#007bff' : '#e0e0e0',
+            color: isRegister ? '#fff' : '#000',
+            border: 'none',
+            cursor: 'pointer'
+          }}
+        >
+          Cadastrar
+        </button>
       </div>
 
-      {/* Painel Direito (Formulário) */}
-      <div className="login-form-container">
-        <div className="login-card-content">
-          <div className="form-header">
-            <h2>Entrar</h2>
-            <p>Use seu e-mail institucional para acessar o SGT.</p>
+      <h2>{isRegister ? 'Criar Conta' : 'Acessar Conta'}</h2>
+
+      {mensagem && <p style={{ color: 'green' }}>{mensagem}</p>}
+      {erro && <p style={{ color: 'red' }}>{erro}</p>}
+
+      <form onSubmit={handleSubmit}>
+        {isRegister && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>Nome:</label>
+            <input
+              type="text"
+              value={nome}
+              onChange={(e) => setNome(e.target.value)}
+              required
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
           </div>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="email">E-mail institucional</label>
-              <input
-                id="email"
-                type="email"
-                placeholder="aluno@instituicao.edu.br"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="senha">Senha</label>
-              <input
-                id="senha"
-                type="password"
-                placeholder="••••••••"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                required
-              />
-            </div>
-
-            <div className="form-options">
-              <label className="checkbox-container">
-                <input
-                  type="checkbox"
-                  checked={lembrar}
-                  onChange={(e) => setLembrar(e.target.checked)}
-                />
-                Lembrar de mim
-              </label>
-              <a href="#esqueci" className="forgot-link">Esqueci a senha</a>
-            </div>
-
-            <button type="submit" className="btn-submit">
-              Entrar
-            </button>
-          </form>
-
-          <div className="register-prompt">
-            Ainda não tem conta? <a href="#cadastre-se">Cadastre-se</a>
-          </div>
+        <div style={{ marginBottom: '15px' }}>
+          <label>E-mail:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          />
         </div>
-      </div>
+
+        <div style={{ marginBottom: '15px' }}>
+          <label>Senha:</label>
+          <input
+            type="password"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            required
+            minLength={6}
+            style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+          />
+        </div>
+
+        {isRegister && (
+          <div style={{ marginBottom: '15px' }}>
+            <label>Turma:</label>
+            <input
+              type="text"
+              value={turma}
+              onChange={(e) => setTurma(e.target.value)}
+              required
+              placeholder="Ex: 3º Ano A"
+              style={{ width: '100%', padding: '8px', marginTop: '5px' }}
+            />
+          </div>
+        )}
+
+        <button
+          type="submit"
+          style={{
+            width: '100%',
+            padding: '10px',
+            backgroundColor: '#28a745',
+            color: '#fff',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}
+        >
+          {isRegister ? 'Finalizar Cadastro' : 'Entrar'}
+        </button>
+      </form>
     </div>
   );
-}
+};
+
+export default Login;
