@@ -80,11 +80,12 @@ export default function App() {
 
       {/* Conteúdo Principal Alternável */}
       <main className="main-content">
-        {abaAtiva === 'dashboard' ? (
-          <Dashboard />
-        ) : (
-          <GerenciadorTarefas />
-        )}
+        {/* Substitua apenas esta parte onde exibe a aba ativa: */}
+{abaAtiva === 'dashboard' ? (
+  <Dashboard onLogout={handleLogout} />
+) : (
+  <GerenciadorTarefas onLogout={handleLogout} />
+)}
       </main>
     </div>
   );
