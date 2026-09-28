@@ -13,11 +13,7 @@ export default function GerenciadorTarefas() {
   const [prioridade, setPrioridade] = useState('MEDIA');
   const [dataEntrega, setDataEntrega] = useState('');
 
-  // Recupera dados do usuário logado (armazenado no Login.jsx)
-  const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
-
   const carregarTarefas = async () => {
-    if (!usuario.id) return;
     try {
       setLoading(true);
       const dados = await tarefaService.listarPorUsuario();
