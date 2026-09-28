@@ -2,20 +2,48 @@ import React, { useState, useEffect } from 'react';
 import Login from './components/Login';
 import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
+import api from './services/api';
 
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [verificandoSessao, setVerificandoSessao] = useState(true);
 
-  // Verifica se o usuário já fez login previamente
   useEffect(() => {
-    const user = localStorage.getItem('sgt_user');
-    if (user) {
-      setUsuarioLogado(JSON.parse(user));
-    }
+    const verificarSessao = async () => {
+      const token = localStorage.getItem('sgt_token');
+
+      if (!token) {
+        setVerificandoSessao(false);
+        return;
+      }
+
+      try {
+        const response = await api.get('/auth/me');
+        const usuario = response.data;
+
+        localStorage.setItem('sgt_user', JSON.stringify({
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          turma: usuario.turma
+        }));
+
+        setUsuarioLogado(usuario);
+      } catch (error) {
+        localStorage.removeItem('sgt_token');
+        localStorage.removeItem('sgt_user');
+        setUsuarioLogado(null);
+      } finally {
+        setVerificandoSessao(false);
+      }
+    };
+
+    verificarSessao();
   }, []);
 
   const handleLoginSucesso = () => {
     const user = localStorage.getItem('sgt_user');
+
     if (user) {
       setUsuarioLogado(JSON.parse(user));
     }
@@ -27,13 +55,15 @@ export default function App() {
     setUsuarioLogado(null);
   };
 
+  if (verificandoSessao) {
+    return <p style={{ padding: '20px' }}>Verificando sessão...</p>;
+  }
+
   return (
     <div>
       {!usuarioLogado ? (
-        /* Se não estiver logado, exibe a tela de Login */
         <Login onLoginSucesso={handleLoginSucesso} />
       ) : (
-        /* Se estiver logado, exibe o Dashboard, o Gerenciador de Tarefas e o botão de Sair */
         <div>
           <header style={styles.header}>
             <span>Usuário: <strong>{usuarioLogado.nome}</strong></span>
@@ -41,10 +71,8 @@ export default function App() {
           </header>
 
           <main style={styles.conteudo}>
-            {/* Dashboard com as métricas */}
             <Dashboard />
             <hr style={{ margin: '30px 0' }} />
-            {/* CRUD completo de tarefas */}
             <GerenciadorTarefas />
           </main>
         </div>
