@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import axios from 'axios';
+import { loginService } from '../services/loginServices';
 
-const Login = () => {
-  // Estado para alternar entre Login (false) e Cadastro (true)
+const Login = ({ onLoginSucesso }) => {
   const [isRegister, setIsRegister] = useState(false);
-
-  // Estados dos campos do formulário
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [turma, setTurma] = useState('');
-
-  // Mensagens de feedback
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
 
@@ -35,38 +30,51 @@ const Login = () => {
     setErro('');
 
     if (isRegister) {
-      // Requisição de CADASTRO -> POST /api/auth/cadastrar
       try {
-        await axios.post('http://localhost:8080/api/auth/cadastrar', {
+        await loginService.cadastrar({
           nome,
           email,
           senha,
           turma
         });
+
         setMensagem('Cadastro realizado com sucesso! Faça login para continuar.');
-        setIsRegister(false); // Alterna para a aba de login após o cadastro
+        setIsRegister(false);
+        setSenha('');
       } catch (err) {
-        setErro(err.response?.data || 'Erro ao realizar cadastro. Verifique os dados.');
+        setErro(
+          err.response?.data?.message ||
+          err.response?.data ||
+          'Erro ao realizar cadastro. Verifique os dados.'
+        );
       }
-    } else {
-      // Requisição de LOGIN -> POST /api/auth/login
-      try {
-        const response = await axios.post('http://localhost:8080/api/auth/login', {
-          email,
-          senha
-        });
-        setMensagem(`Bem-vindo, ${response.data.nome}!`);
-        // Armazena o token e/ou dados do usuário no localStorage
-        localStorage.setItem('usuario', JSON.stringify(response.data));
-      } catch (err) {
-        setErro('E-mail ou senha inválidos.');
-      }
+
+      return;
+    }
+
+    try {
+      const usuario = await loginService.login(email, senha);
+
+      localStorage.setItem('sgt_token', usuario.token);
+      localStorage.setItem('sgt_user', JSON.stringify({
+        id: usuario.id,
+        nome: usuario.nome,
+        email: usuario.email,
+        turma: usuario.turma
+      }));
+
+      setMensagem(`Bem-vindo, ${usuario.nome}!`);
+      onLoginSucesso?.();
+    } catch (err) {
+      setErro(
+        err.response?.data?.message ||
+        'E-mail ou senha inválidos.'
+      );
     }
   };
 
   return (
     <div style={{ maxWidth: '400px', margin: '50px auto', padding: '20px', border: '1px solid #ccc', borderRadius: '8px' }}>
-      {/* Botões de Alternância de Aba */}
       <div style={{ display: 'flex', marginBottom: '20px' }}>
         <button
           type="button"
@@ -104,7 +112,6 @@ const Login = () => {
       {erro && <p style={{ color: 'red' }}>{erro}</p>}
 
       <form onSubmit={handleSubmit}>
-        {/* Campo NOME (Apenas no cadastro) */}
         {isRegister && (
           <div style={{ marginBottom: '15px' }}>
             <label>Nome:</label>
@@ -118,7 +125,6 @@ const Login = () => {
           </div>
         )}
 
-        {/* Campo E-MAIL */}
         <div style={{ marginBottom: '15px' }}>
           <label>E-mail:</label>
           <input
@@ -130,7 +136,6 @@ const Login = () => {
           />
         </div>
 
-        {/* Campo SENHA */}
         <div style={{ marginBottom: '15px' }}>
           <label>Senha:</label>
           <input
@@ -143,7 +148,6 @@ const Login = () => {
           />
         </div>
 
-        {/* Campo TURMA (Apenas no cadastro) */}
         {isRegister && (
           <div style={{ marginBottom: '15px' }}>
             <label>Turma:</label>
