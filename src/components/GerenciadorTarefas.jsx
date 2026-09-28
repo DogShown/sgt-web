@@ -20,7 +20,7 @@ export default function GerenciadorTarefas() {
     if (!usuario.id) return;
     try {
       setLoading(true);
-      const dados = await tarefaService.listarPorUsuario(usuario.id);
+      const dados = await tarefaService.listarPorUsuario();
       setTarefas(dados);
     } catch (err) {
       setErro('Erro ao carregar a lista de tarefas.');
