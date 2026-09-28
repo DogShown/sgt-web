@@ -19,7 +19,7 @@ export default function Dashboard({ onLogout }) {
 
   const carregarTarefas = async () => {
     try {
-      const data = await tarefaService.listarPorUsuario(usuario.id);
+      const data = await tarefaService.listarPorUsuario();
       setTarefas(data);
     } catch (err) {
       alert('Erro ao carregar tarefas.');
@@ -37,7 +37,6 @@ export default function Dashboard({ onLogout }) {
         categoria,
         prioridade,
         dataEntrega,
-        usuarioId: usuario.id
       });
       setTitulo('');
       setDescricao('');
