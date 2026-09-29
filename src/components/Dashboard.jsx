@@ -87,7 +87,7 @@ export default function Dashboard() {
         <article className="stat-card"><span className="stat-label">Concluídas</span><strong>{carregando ? '—' : metricas.concluidas}</strong><span className="stat-helper">tarefas finalizadas</span></article>
         <article className="stat-card"><span className="stat-label">Pendentes</span><strong>{carregando ? '—' : metricas.pendentes}</strong><span className="stat-helper">aguardando conclusão</span></article>
         <article className="stat-card stat-card-warning"><span className="stat-label">Atrasadas</span><strong>{carregando ? '—' : metricas.atrasadas}</strong><span className="stat-helper">prazo já ultrapassado</span></article>
-        <article className="stat-card stat-card-accent"><span className="stat-label">Taxa de conclusão</span><strong>{carregando ? '—' : \`\${metricas.taxa}%\`}</strong><span className="stat-helper">{periodo === 'mes' ? 'visão atual' : 'visão do semestre'}</span></article>
+        <article className="stat-card stat-card-accent"><span className="stat-label">Taxa de conclusão</span><strong>{carregando ? '—' : `${metricas.taxa}%`}</strong><span className="stat-helper">{periodo === 'mes' ? 'visão atual' : 'visão do semestre'}</span></article>
       </section>
 
       <section className="dashboard-grid">
@@ -99,7 +99,7 @@ export default function Dashboard() {
               {categoriasOrdenadas.map(([categoria, quantidade]) => (
                 <div className="category-row" key={categoria}>
                   <div className="category-row-label"><span>{categoria}</span><strong>{quantidade}</strong></div>
-                  <div className="category-bar"><span style={{ width: \`\${(quantidade / maiorCategoria) * 100}%\` }} /></div>
+                  <div className="category-bar"><span style={{ width: `${(quantidade / maiorCategoria) * 100}%` }} /></div>
                 </div>
               ))}
             </div>}
