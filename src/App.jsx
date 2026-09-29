@@ -1,18 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Login from './components/Login';
+import Cadastro from './components/Cadastro';
+import Home from './components/Home';
 import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
 import api from './services/api';
 
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
+  const [telaPublica, setTelaPublica] = useState('home');
   const [abaAtiva, setAbaAtiva] = useState('dashboard');
   const [verificandoSessao, setVerificandoSessao] = useState(true);
 
   useEffect(() => {
     const verificarSessao = async () => {
       const token = localStorage.getItem('sgt_token');
-
       if (!token) {
         setVerificandoSessao(false);
         return;
@@ -21,19 +23,13 @@ export default function App() {
       try {
         const response = await api.get('/auth/me');
         const usuario = response.data;
-
         localStorage.setItem('sgt_user', JSON.stringify({
-          id: usuario.id,
-          nome: usuario.nome,
-          email: usuario.email,
-          turma: usuario.turma
+          id: usuario.id, nome: usuario.nome, email: usuario.email, turma: usuario.turma
         }));
-
         setUsuarioLogado(usuario);
-      } catch (error) {
+      } catch {
         localStorage.removeItem('sgt_token');
         localStorage.removeItem('sgt_user');
-        setUsuarioLogado(null);
       } finally {
         setVerificandoSessao(false);
       }
@@ -44,10 +40,7 @@ export default function App() {
 
   const handleLoginSucesso = () => {
     const user = localStorage.getItem('sgt_user');
-
-    if (user) {
-      setUsuarioLogado(JSON.parse(user));
-    }
+    if (user) setUsuarioLogado(JSON.parse(user));
   };
 
   const handleLogout = () => {
@@ -55,90 +48,34 @@ export default function App() {
     localStorage.removeItem('sgt_user');
     setUsuarioLogado(null);
     setAbaAtiva('dashboard');
+    setTelaPublica('home');
   };
 
-  if (verificandoSessao) {
-    return <p style={{ padding: '20px' }}>Verificando sessão...</p>;
-  }
+  if (verificandoSessao) return <div className="session-loading">Verificando sessão...</div>;
 
   if (!usuarioLogado) {
-    return <Login onLoginSucesso={handleLoginSucesso} />;
+    if (telaPublica === 'login') return <Login onLoginSucesso={handleLoginSucesso} onCadastro={() => setTelaPublica('cadastro')} />;
+    if (telaPublica === 'cadastro') return <Cadastro onVoltarLogin={() => setTelaPublica('login')} onCadastroSucesso={() => setTelaPublica('login')} />;
+    return <Home onLogin={() => setTelaPublica('login')} onCadastro={() => setTelaPublica('cadastro')} />;
   }
 
   return (
     <div className="app-container">
       <aside className="sidebar">
         <div>
-          <div className="sidebar-header">
-            <h2>SGT</h2>
-          </div>
-
+          <div className="sidebar-header"><h2>SGT</h2></div>
           <ul className="sidebar-menu">
-            <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
-              <a
-                href="#dashboard"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAbaAtiva('dashboard');
-                }}
-              >
-                Dashboard
-              </a>
-            </li>
-
-            <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-              <a
-                href="#tarefas"
-                onClick={(e) => {
-                  e.preventDefault();
-                  setAbaAtiva('tarefas');
-                }}
-              >
-                Gerenciador de Tarefas
-              </a>
-            </li>
+            <li className={abaAtiva === 'dashboard' ? 'active' : ''}><button type="button" onClick={() => setAbaAtiva('dashboard')}>Dashboard</button></li>
+            <li className={abaAtiva === 'tarefas' ? 'active' : ''}><button type="button" onClick={() => setAbaAtiva('tarefas')}>Gerenciador de Tarefas</button></li>
           </ul>
         </div>
-
-        <div
-          style={{
-            borderTop: '1px solid rgba(255,255,255,0.1)',
-            paddingTop: '16px'
-          }}
-        >
-          <p
-            style={{
-              fontSize: '0.85rem',
-              color: 'var(--sidebar-text)',
-              marginBottom: '8px'
-            }}
-          >
-            Usuário:{' '}
-            <strong style={{ color: '#fff' }}>
-              {usuarioLogado.nome || 'Usuário'}
-            </strong>
-          </p>
-
-          <button
-            onClick={handleLogout}
-            className="btn-primary"
-            style={{
-              backgroundColor: 'var(--accent-red)',
-              padding: '8px 12px',
-              fontSize: '0.85rem'
-            }}
-          >
-            Sair
-          </button>
+        <div className="sidebar-user">
+          <p>Usuário: <strong>{usuarioLogado.nome || 'Usuário'}</strong></p>
+          <button onClick={handleLogout} className="logout-button">Sair</button>
         </div>
       </aside>
-
       <main className="main-content">
-        {abaAtiva === 'dashboard' ? (
-          <Dashboard onLogout={handleLogout} />
-        ) : (
-          <GerenciadorTarefas onLogout={handleLogout} />
-        )}
+        {abaAtiva === 'dashboard' ? <Dashboard /> : <GerenciadorTarefas onLogout={handleLogout} />}
       </main>
     </div>
   );
