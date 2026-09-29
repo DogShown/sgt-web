@@ -54,7 +54,7 @@ export default function App() {
   if (verificandoSessao) return <div className="session-loading">Verificando sessão...</div>;
 
   if (!usuarioLogado) {
-    if (telaPublica === 'login') return <Login onLoginSucesso={handleLoginSucesso} onCadastro={() => setTelaPublica('cadastro')} />;
+    if (telaPublica === 'login') return <Login onLoginSucesso={handleLoginSucesso} onCadastro={() => setTelaPublica('cadastro')} onVoltarHome={() => setTelaPublica('home')} />;
     if (telaPublica === 'cadastro') return <Cadastro onVoltarLogin={() => setTelaPublica('login')} onCadastroSucesso={() => setTelaPublica('login')} />;
     return <Home onLogin={() => setTelaPublica('login')} onCadastro={() => setTelaPublica('cadastro')} />;
   }
