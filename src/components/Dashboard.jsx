@@ -72,7 +72,7 @@ export default function Dashboard() {
         <div>
           <p className="dashboard-eyebrow">SGT • Sistema de Gestão de Tarefas</p>
           <h1>Dashboard de desempenho</h1>
-          <p>Visão geral das suas tarefas{usuario.turma ? \` — Turma \${usuario.turma}\` : ''}</p>
+          <p>Visão geral das suas tarefas{usuario.turma ? ` — Turma ${usuario.turma}` : ''}</p>
         </div>
 
         <div className="period-toggle" aria-label="Período do dashboard">
