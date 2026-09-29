@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { loginService } from '../services/loginServices';
 
-export default function Login({ onLoginSucesso, onCadastro }) {
+export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState('');
@@ -48,7 +48,7 @@ export default function Login({ onLoginSucesso, onCadastro }) {
 
       <section className="auth-form-panel">
         <div className="auth-card">
-          <button type="button" className="back-link" onClick={() => window.location.hash = ''}>← Voltar para início</button>
+          <button type="button" className="back-link" onClick={onVoltarHome}>← Voltar para início</button>
           <div className="auth-heading">
             <h2>Bem-vindo de volta!</h2>
             <p>Entre na sua conta para continuar.</p>
