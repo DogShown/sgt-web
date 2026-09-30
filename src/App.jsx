@@ -51,32 +51,70 @@ export default function App() {
     setTelaPublica('home');
   };
 
-  if (verificandoSessao) return <div className="session-loading">Verificando sessão...</div>;
+  if (verificandoSessao) {
+    return <div className="session-loading">Verificando sessão...</div>;
+  }
+
+  const screenKey = usuarioLogado
+    ? `private-${abaAtiva}`
+    : `public-${telaPublica}`;
 
   if (!usuarioLogado) {
-    if (telaPublica === 'login') return <Login onLoginSucesso={handleLoginSucesso} onCadastro={() => setTelaPublica('cadastro')} onVoltarHome={() => setTelaPublica('home')} />;
-    if (telaPublica === 'cadastro') return <Cadastro onVoltarLogin={() => setTelaPublica('login')} onCadastroSucesso={() => setTelaPublica('login')} />;
-    return <Home onLogin={() => setTelaPublica('login')} onCadastro={() => setTelaPublica('cadastro')} />;
+    return (
+      <div className="screen-transition" key={screenKey}>
+        {telaPublica === 'login' && (
+          <Login
+            onLoginSucesso={handleLoginSucesso}
+            onCadastro={() => setTelaPublica('cadastro')}
+            onVoltarHome={() => setTelaPublica('home')}
+          />
+        )}
+
+        {telaPublica === 'cadastro' && (
+          <Cadastro
+            onVoltarLogin={() => setTelaPublica('login')}
+            onCadastroSucesso={() => setTelaPublica('login')}
+          />
+        )}
+
+        {telaPublica === 'home' && (
+          <Home
+            onLogin={() => setTelaPublica('login')}
+            onCadastro={() => setTelaPublica('cadastro')}
+          />
+        )}
+      </div>
+    );
   }
 
   return (
-    <div className="app-container">
-      <aside className="sidebar">
-        <div>
-          <div className="sidebar-header"><h2>SGT</h2></div>
-          <ul className="sidebar-menu">
-            <li className={abaAtiva === 'dashboard' ? 'active' : ''}><button type="button" onClick={() => setAbaAtiva('dashboard')}>Dashboard</button></li>
-            <li className={abaAtiva === 'tarefas' ? 'active' : ''}><button type="button" onClick={() => setAbaAtiva('tarefas')}>Gerenciador de Tarefas</button></li>
-          </ul>
-        </div>
-        <div className="sidebar-user">
-          <p>Usuário: <strong>{usuarioLogado.nome || 'Usuário'}</strong></p>
-          <button onClick={handleLogout} className="logout-button">Sair</button>
-        </div>
-      </aside>
-      <main className="main-content">
-        {abaAtiva === 'dashboard' ? <Dashboard /> : <GerenciadorTarefas onLogout={handleLogout} />}
-      </main>
+    <div className="screen-transition" key={screenKey}>
+      <div className="app-container">
+        <aside className="sidebar">
+          <div>
+            <div className="sidebar-header"><h2>SGT</h2></div>
+            <ul className="sidebar-menu">
+              <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
+                <button type="button" onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
+              </li>
+              <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
+                <button type="button" onClick={() => setAbaAtiva('tarefas')}>Gerenciador de Tarefas</button>
+              </li>
+            </ul>
+          </div>
+
+          <div className="sidebar-user">
+            <p>Usuário: <strong>{usuarioLogado.nome || 'Usuário'}</strong></p>
+            <button onClick={handleLogout} className="logout-button">Sair</button>
+          </div>
+        </aside>
+
+        <main className="main-content">
+          {abaAtiva === 'dashboard'
+            ? <Dashboard />
+            : <GerenciadorTarefas onLogout={handleLogout} />}
+        </main>
+      </div>
     </div>
   );
 }
