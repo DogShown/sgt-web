@@ -6,11 +6,38 @@ import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
 import api from './services/api';
 
+function ThemeToggle({ tema, onToggle, className = '' }) {
+  const escuro = tema === 'escuro';
+
+  return (
+    <button
+      type="button"
+      className={`theme-toggle ${className}`}
+      onClick={onToggle}
+      aria-label={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'}
+      title={escuro ? 'Tema claro' : 'Tema escuro'}
+    >
+      <span className="theme-toggle-icon" aria-hidden="true">{escuro ? '☀' : '☾'}</span>
+      <span className="theme-toggle-label">{escuro ? 'Claro' : 'Escuro'}</span>
+    </button>
+  );
+}
+
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [telaPublica, setTelaPublica] = useState('home');
   const [abaAtiva, setAbaAtiva] = useState('dashboard');
   const [verificandoSessao, setVerificandoSessao] = useState(true);
+  const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = tema;
+    localStorage.setItem('sgt_theme', tema);
+  }, [tema]);
+
+  const alternarTema = () => {
+    setTema((temaAtual) => temaAtual === 'escuro' ? 'claro' : 'escuro');
+  };
 
   useEffect(() => {
     const verificarSessao = async () => {
@@ -71,6 +98,8 @@ export default function App() {
   if (!usuarioLogado) {
     return (
       <div className="screen-transition" key={screenKey}>
+        <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
+
         {telaPublica === 'login' && (
           <Login
             onLoginSucesso={handleLoginSucesso}
@@ -114,6 +143,7 @@ export default function App() {
 
           <div className="sidebar-user">
             <p>Usuário: <strong>{usuarioLogado.nome || 'Usuário'}</strong></p>
+            <ThemeToggle tema={tema} onToggle={alternarTema} />
             <button onClick={handleLogout} className="logout-button">Sair</button>
           </div>
         </aside>
