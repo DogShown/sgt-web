@@ -2266,3 +2266,139 @@ button:disabled {
     padding: 20px 16px 90px;
   }
 }
+
+
+/* Figma sidebar geometry */
+.app-container {
+  background: #f1f5f9;
+}
+
+.app-container .sidebar {
+  width: 176px;
+  min-width: 176px;
+  min-height: 100vh;
+  padding: 0;
+  background: #07263f;
+  box-shadow: none;
+}
+
+.app-container .sidebar::before {
+  display: none;
+}
+
+.app-container .sidebar-header {
+  padding: 20px 16px;
+}
+
+.app-container .sidebar-header h2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #fff;
+  font-size: 1rem;
+  letter-spacing: 0;
+}
+
+.app-container .sidebar-header h2::before {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,.12);
+  box-shadow: none;
+  font-size: .75rem;
+}
+
+.app-container .sidebar-menu {
+  padding: 0 8px;
+}
+
+.app-container .sidebar-menu li {
+  margin-bottom: 4px;
+}
+
+.app-container .sidebar-menu button {
+  width: 100%;
+  min-height: 40px;
+  padding: 10px 10px 10px 38px;
+  border-radius: 8px;
+  color: rgba(255,255,255,.55);
+  background: transparent;
+  font-size: .875rem;
+  font-weight: 400;
+  text-align: left;
+}
+
+.app-container .sidebar-menu button::after {
+  left: 11px;
+  color: currentColor;
+}
+
+.app-container .sidebar-menu li:hover button,
+.app-container .sidebar-menu li.active button {
+  color: #fff;
+  background: rgba(0,0,0,.3);
+  box-shadow: none;
+}
+
+.app-container .sidebar-user {
+  margin-top: auto;
+  padding: 20px 12px;
+  border-top: 1px solid rgba(255,255,255,.08);
+}
+
+.app-container .sidebar-user p {
+  color: rgba(255,255,255,.4);
+  font-size: .72rem;
+}
+
+.app-container .sidebar-user strong {
+  color: #fff;
+}
+
+.app-container .logout-button {
+  color: rgba(255,255,255,.45);
+  background: transparent;
+  font-size: .75rem;
+}
+
+.app-container .main-content {
+  background: #f1f5f9;
+}
+
+@media (max-width: 767px) {
+  .app-container {
+    display: block;
+  }
+
+  .app-container .sidebar {
+    width: 100%;
+    min-width: 0;
+    min-height: auto;
+    position: relative;
+  }
+
+  .app-container .sidebar-header {
+    padding: 14px 16px;
+  }
+
+  .app-container .sidebar-menu {
+    display: flex;
+    gap: 4px;
+    padding: 0 8px 8px;
+    overflow-x: auto;
+  }
+
+  .app-container .sidebar-menu li {
+    flex: 0 0 auto;
+    margin: 0;
+  }
+
+  .app-container .sidebar-menu button {
+    width: auto;
+    padding-right: 14px;
+  }
+
+  .app-container .sidebar-user {
+    display: none;
+  }
+}
