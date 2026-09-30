@@ -1838,3 +1838,431 @@ button:disabled {
   color: #037f8c;
   background: #eef9fa;
 }
+
+
+/* =========================================================
+   FIGMA FIDELITY PASS
+   Source of truth: Figma Make screens supplied for SGT.
+   ========================================================= */
+
+:root {
+  --figma-navy: #07263f;
+  --figma-navy-900: #024059;
+  --figma-teal: #037f8c;
+  --figma-bg: #f1f5f9;
+  --figma-border: #e2e8f0;
+  --figma-muted: #64748b;
+  --figma-text: #0f172a;
+}
+
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  background: var(--figma-bg);
+  font-family: 'Inter', sans-serif;
+}
+
+.auth-page .auth-brand-panel {
+  width: 50%;
+  min-height: 100vh;
+  padding: 40px 48px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  color: #fff;
+  background: linear-gradient(160deg, #024059 0%, #025570 50%, #037f8c 100%);
+}
+
+.auth-page .auth-brand-panel::before,
+.auth-page .auth-brand-panel::after {
+  display: none;
+}
+
+.auth-page .auth-form-panel {
+  width: 50%;
+  min-height: 100vh;
+  padding: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--figma-bg);
+}
+
+.auth-page .auth-card {
+  width: 100%;
+  max-width: 400px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.auth-page .brand-mark {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-page .brand-mark span {
+  width: 36px;
+  height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  background: rgba(255,255,255,.15);
+  box-shadow: none;
+}
+
+.auth-page .brand-mark strong {
+  font-size: 1rem;
+  letter-spacing: .04em;
+}
+
+.auth-page .auth-brand-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.auth-page .auth-brand-copy .home-kicker {
+  display: none;
+}
+
+.auth-page .auth-brand-copy h1 {
+  max-width: 580px;
+  margin: 0;
+  color: #fff;
+  font-size: clamp(2rem, 3.2vw, 2.65rem);
+  line-height: 1.18;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.auth-page .auth-brand-copy p {
+  max-width: 430px;
+  margin: 0;
+  color: rgba(255,255,255,.7);
+  font-size: .875rem;
+  line-height: 1.7;
+}
+
+.auth-page .auth-benefits {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 6px;
+  list-style: none;
+}
+
+.auth-page .auth-benefits li {
+  padding: 0;
+  color: rgba(255,255,255,.8);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+.auth-page .auth-benefits li::before {
+  content: '·';
+  margin-right: 4px;
+  color: #fff;
+}
+
+.auth-page .auth-brand-panel > small {
+  color: rgba(255,255,255,.5);
+  font-size: .75rem;
+}
+
+.auth-page .back-link {
+  display: none;
+}
+
+.auth-page .auth-heading {
+  margin-bottom: 24px;
+}
+
+.auth-page .auth-heading h2 {
+  margin: 0 0 4px;
+  color: #024059;
+  font-size: 1.5rem;
+  line-height: 1.25;
+  font-weight: 700;
+  letter-spacing: -.02em;
+}
+
+.auth-page .auth-heading p {
+  margin: 0;
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.auth-page .form-message {
+  margin-bottom: 16px;
+}
+
+.auth-page .form-field {
+  margin-bottom: 16px;
+}
+
+.auth-page .form-field span {
+  display: block;
+  margin-bottom: 6px;
+  color: #0f172a;
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.auth-page .form-field input,
+.auth-page .form-field select {
+  width: 100%;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  outline: none;
+  color: #0f172a;
+  background: #fff;
+  font-family: inherit;
+  font-size: .875rem;
+  box-shadow: none;
+  transition: border-color .15s ease, box-shadow .15s ease;
+}
+
+.auth-page .form-field input::placeholder {
+  color: #94a3b8;
+}
+
+.auth-page .form-field input:focus,
+.auth-page .form-field select:focus {
+  border-color: #037f8c;
+  box-shadow: 0 0 0 2px rgba(3,127,140,.1);
+  transform: none;
+}
+
+.auth-page .form-options {
+  margin: 2px 0 16px;
+  color: #334155;
+  font-size: .875rem;
+}
+
+.auth-page .form-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.auth-page .form-options input {
+  width: 16px;
+  height: 16px;
+  accent-color: #037f8c;
+}
+
+.auth-page .forgot-link {
+  color: #024059;
+  font-size: .875rem;
+  font-weight: 600;
+}
+
+.auth-page .btn-primary.btn-full {
+  width: 100%;
+  min-height: 42px;
+  border-radius: 4px;
+  background: #024059;
+  box-shadow: none;
+  font-size: .875rem;
+}
+
+.auth-page .btn-primary.btn-full:hover {
+  background: #02627a;
+  box-shadow: none;
+}
+
+.auth-page .btn-primary.btn-full::after {
+  display: none;
+}
+
+.auth-page .auth-switch {
+  margin-top: 20px;
+  color: #64748b;
+  font-size: .875rem;
+  text-align: center;
+}
+
+.auth-page .auth-switch button {
+  color: #024059;
+  font-weight: 700;
+}
+
+/* Cadastro: mantém a mesma composição visual da referência, adaptada
+   aos campos reais que o backend do SGT aceita. */
+.auth-page:has(.auth-heading h2:is(:where(*))) .auth-brand-copy h1 {
+  text-wrap: balance;
+}
+
+/* Dashboard: medidas e superfícies alinhadas ao frame Figma. */
+.dashboard-page {
+  min-height: 100vh;
+  padding: 20px 32px 28px;
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.dashboard-header {
+  margin-bottom: 24px;
+}
+
+.dashboard-header h1 {
+  color: #024059;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -.01em;
+}
+
+.dashboard-header p:last-child {
+  margin-top: 2px;
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.period-toggle {
+  border-color: #cbd5e1;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.period-toggle button {
+  min-height: 34px;
+  padding: 6px 16px;
+  color: #334155;
+  background: #fff;
+  font-size: .875rem;
+}
+
+.period-toggle button.active {
+  color: #fff;
+  background: #024059;
+}
+
+.dashboard-stats {
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.dashboard-stats .stat-card {
+  min-height: 132px;
+  padding: 20px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.dashboard-stats .stat-card::before {
+  display: none;
+}
+
+.dashboard-stats .stat-card .stat-label {
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.dashboard-stats .stat-card strong {
+  display: block;
+  margin-top: 8px;
+  color: #024059;
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.dashboard-stats .stat-card .stat-helper {
+  display: block;
+  margin-top: 3px;
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.dashboard-grid {
+  gap: 16px;
+}
+
+.dashboard-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: none;
+}
+
+.dashboard-card .card-heading h2 {
+  color: #024059;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.dashboard-card .card-heading p {
+  color: #64748b;
+  font-size: .875rem;
+}
+
+.category-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: #e2e8f0;
+}
+
+.category-bar span {
+  height: 6px;
+  border-radius: 999px;
+  background: #037f8c;
+}
+
+.upcoming-item {
+  padding: 14px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.upcoming-item:last-child {
+  border-bottom: 0;
+}
+
+.upcoming-item strong {
+  color: #334155;
+  font-size: .875rem;
+}
+
+.upcoming-item span,
+.upcoming-item time {
+  color: #94a3b8;
+  font-size: .75rem;
+}
+
+/* Desktop/mobile composition closer to the original Figma frame. */
+@media (max-width: 767px) {
+  .auth-page {
+    display: block;
+  }
+
+  .auth-page .auth-brand-panel {
+    width: 100%;
+    min-height: auto;
+    padding: 28px 24px;
+    gap: 42px;
+  }
+
+  .auth-page .auth-brand-copy h1 {
+    font-size: 2rem;
+  }
+
+  .auth-page .auth-form-panel {
+    width: 100%;
+    min-height: auto;
+    padding: 40px 24px 56px;
+  }
+
+  .dashboard-page {
+    padding: 20px 16px 90px;
+  }
+}
