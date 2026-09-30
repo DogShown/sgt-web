@@ -2836,3 +2836,14 @@ body,
     display: none;
   }
 }
+
+
+.home-page .public-actions {
+  padding-right: 96px;
+}
+
+@media (max-width: 560px) {
+  .home-page .public-actions {
+    padding-right: 0;
+  }
+}
