@@ -1775,3 +1775,66 @@ button:disabled {
     padding: 28px 18px;
   }
 }
+
+
+/* ===== Ícones visuais sem dependências extras ===== */
+
+.sidebar-menu button {
+  position: relative;
+  padding-left: 43px;
+}
+
+.sidebar-menu button::after {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  width: 18px;
+  transform: translateY(-50%);
+  color: currentColor;
+  font-size: .82rem;
+  line-height: 1;
+  text-align: center;
+  opacity: .82;
+}
+
+.sidebar-menu li:nth-child(1) button::after { content: "▦"; }
+.sidebar-menu li:nth-child(2) button::after { content: "✓"; }
+
+.stat-card {
+  padding-left: 24px;
+}
+
+.dashboard-stats .stat-card {
+  position: relative;
+}
+
+.dashboard-stats .stat-card::before {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  color: #037f8c;
+  background: #eef9fa;
+  font-size: .88rem;
+  font-weight: 850;
+  content: "";
+}
+
+.dashboard-stats .stat-card:nth-child(1)::before { content: "✓"; }
+.dashboard-stats .stat-card:nth-child(2)::before { content: "•"; font-size: 1.2rem; }
+.dashboard-stats .stat-card:nth-child(3)::before { content: "!"; }
+.dashboard-stats .stat-card:nth-child(4)::before { content: "%"; }
+
+.dashboard-stats .stat-card-warning::before {
+  color: #a16207;
+  background: #fffbeb;
+}
+
+.dashboard-stats .stat-card-accent::before {
+  color: #037f8c;
+  background: #eef9fa;
+}
