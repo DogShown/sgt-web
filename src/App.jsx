@@ -52,7 +52,16 @@ export default function App() {
   };
 
   if (verificandoSessao) {
-    return <div className="session-loading">Verificando sessão...</div>;
+    return (
+      <div className="session-loading">
+        <div className="session-loader-card" role="status" aria-live="polite">
+          <div className="session-loader-logo">✓</div>
+          <strong>SGT</strong>
+          <span>Preparando seu espaço...</span>
+          <div className="session-loader-dots" aria-hidden="true"><i /><i /><i /></div>
+        </div>
+      </div>
+    );
   }
 
   const screenKey = usuarioLogado
