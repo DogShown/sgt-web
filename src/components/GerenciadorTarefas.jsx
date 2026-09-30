@@ -1,12 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
+const formatarData = (data) => {
+  if (!data) return 'Sem prazo';
+  const [ano, mes, dia] = data.split('-');
+  if (!ano || !mes || !dia) return data;
+  return new Date(Number(ano), Number(mes) - 1, Number(dia)).toLocaleDateString('pt-BR');
+};
+
+const labelCategoria = {
+  TRABALHO: 'Trabalho',
+  ESTUDO: 'Estudo',
+  PESSOAL: 'Pessoal'
+};
+
+const labelPrioridade = {
+  BAIXA: 'Baixa',
+  MEDIA: 'Média',
+  ALTA: 'Alta'
+};
+
+const labelStatus = {
+  PENDENTE: 'Pendente',
+  CONCLUIDA_NO_PRAZO: 'Concluída',
+  CONCLUIDA_COM_ATRASO: 'Concluída com atraso'
+};
+
 function GerenciadorTarefas() {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [criando, setCriando] = useState(false);
 
-  // Estados do formulário alinhados com o TarefaRequestDTO
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
   const [categoria, setCategoria] = useState('TRABALHO');
@@ -15,9 +40,10 @@ function GerenciadorTarefas() {
 
   const carregarTarefas = async () => {
     try {
+      setErro('');
       setLoading(true);
       const dados = await tarefaService.listarPorUsuario();
-      setTarefas(dados);
+      setTarefas(Array.isArray(dados) ? dados : []);
     } catch (err) {
       setErro('Erro ao carregar a lista de tarefas.');
     } finally {
@@ -29,10 +55,18 @@ function GerenciadorTarefas() {
     carregarTarefas();
   }, []);
 
-  // Enviar formulário (Criar Tarefa)
+  const limparFormulario = () => {
+    setTitulo('');
+    setDescricao('');
+    setCategoria('TRABALHO');
+    setPrioridade('MEDIA');
+    setDataEntrega('');
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
+    setCriando(true);
 
     const novaTarefaDTO = {
       titulo,
@@ -44,31 +78,31 @@ function GerenciadorTarefas() {
 
     try {
       await tarefaService.criar(novaTarefaDTO);
-      setTitulo('');
-      setDescricao('');
-      setDataEntrega('');
-      carregarTarefas(); // Atualiza a lista
+      limparFormulario();
+      await carregarTarefas();
     } catch (err) {
       setErro(err.response?.data?.message || 'Erro ao criar a tarefa.');
+    } finally {
+      setCriando(false);
     }
   };
 
-  // Concluir Tarefa
   const handleConcluir = async (id) => {
     try {
+      setErro('');
       await tarefaService.concluir(id);
-      carregarTarefas();
+      await carregarTarefas();
     } catch (err) {
       setErro('Erro ao concluir a tarefa.');
     }
   };
 
-  // Deletar Tarefa
   const handleDeletar = async (id) => {
     if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
       try {
+        setErro('');
         await tarefaService.deletar(id);
-        carregarTarefas();
+        await carregarTarefas();
       } catch (err) {
         setErro('Erro ao excluir a tarefa.');
       }
@@ -76,98 +110,168 @@ function GerenciadorTarefas() {
   };
 
   return (
-    <div style={{ maxWidth: '700px', margin: '20px auto', padding: '20px' }}>
-      <h2>Gerenciador de Tarefas - SGT</h2>
-      {erro && <p style={{ color: 'red' }}>{erro}</p>}
-
-      {/* Formulário de Criação */}
-      <form onSubmit={handleSubmit} style={{ marginBottom: '30px', padding: '15px', border: '1px solid #ccc', borderRadius: '5px' }}>
-        <h3>Nova Tarefa</h3>
-        
+    <div className="tasks-page">
+      <header className="tasks-header">
         <div>
-          <label htmlFor="titulo">Título:</label>
-          <input
-            id="titulo"
-            name="titulo"
-            type="text"
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            required
-            style={{ width: '100%', marginBottom: '10px' }}
-          />
+          <p className="dashboard-eyebrow">SGT • Organização</p>
+          <h1>Gerenciador de tarefas</h1>
+          <p>Crie, acompanhe e conclua suas atividades em um só lugar.</p>
         </div>
-
-        <div>
-          <label htmlFor="descricao">Descrição:</label>
-          <textarea
-            id="descricao"
-            name="descricao"
-            value={descricao}
-            onChange={(e) => setDescricao(e.target.value)}
-            style={{ width: '100%', marginBottom: '10px' }}
-          />
+        <div className="tasks-summary">
+          <span>{tarefas.length}</span>
+          <small>{tarefas.length === 1 ? 'tarefa cadastrada' : 'tarefas cadastradas'}</small>
         </div>
+      </header>
 
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px' }}>
-          <div>
-            <label htmlFor="categoria">Categoria:</label>
-            <select id="categoria" name="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
-              <option value="TRABALHO">Trabalho</option>
-              <option value="ESTUDO">Estudo</option>
-              <option value="PESSOAL">Pessoal</option>
-            </select>
+      {erro && <div className="dashboard-alert" role="alert">{erro}</div>}
+
+      <section className="tasks-layout">
+        <article className="task-form-card">
+          <div className="card-heading">
+            <div>
+              <p className="section-kicker">Nova atividade</p>
+              <h2>Criar tarefa</h2>
+              <p>Adicione os detalhes e defina o prazo.</p>
+            </div>
+            <span className="task-form-icon" aria-hidden="true">+</span>
           </div>
 
-          <div>
-            <label htmlFor="prioridade">Prioridade:</label>
-            <select id="prioridade" name="prioridade" value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
-              <option value="BAIXA">Baixa</option>
-              <option value="MEDIA">Média</option>
-              <option value="ALTA">Alta</option>
-            </select>
+          <form className="task-form" onSubmit={handleSubmit}>
+            <label className="form-field">
+              <span>Título</span>
+              <input
+                id="titulo"
+                name="titulo"
+                type="text"
+                value={titulo}
+                onChange={(e) => setTitulo(e.target.value)}
+                placeholder="Ex.: Trabalho de Matemática"
+                required
+              />
+            </label>
+
+            <label className="form-field">
+              <span>Descrição</span>
+              <textarea
+                id="descricao"
+                name="descricao"
+                value={descricao}
+                onChange={(e) => setDescricao(e.target.value)}
+                placeholder="Descreva o que precisa ser feito..."
+                rows="4"
+              />
+            </label>
+
+            <div className="task-form-row">
+              <label className="form-field">
+                <span>Categoria</span>
+                <select id="categoria" name="categoria" value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+                  <option value="TRABALHO">Trabalho</option>
+                  <option value="ESTUDO">Estudo</option>
+                  <option value="PESSOAL">Pessoal</option>
+                </select>
+              </label>
+
+              <label className="form-field">
+                <span>Prioridade</span>
+                <select id="prioridade" name="prioridade" value={prioridade} onChange={(e) => setPrioridade(e.target.value)}>
+                  <option value="BAIXA">Baixa</option>
+                  <option value="MEDIA">Média</option>
+                  <option value="ALTA">Alta</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="form-field">
+              <span>Prazo de entrega</span>
+              <input
+                id="dataEntrega"
+                name="dataEntrega"
+                type="date"
+                value={dataEntrega}
+                onChange={(e) => setDataEntrega(e.target.value)}
+                required
+              />
+            </label>
+
+            <button className="btn-primary btn-full task-submit" type="submit" disabled={criando}>
+              <span aria-hidden="true">{criando ? '…' : '+'}</span>
+              {criando ? 'Criando tarefa...' : 'Criar tarefa'}
+            </button>
+          </form>
+        </article>
+
+        <section className="task-list-section">
+          <div className="section-title-row">
+            <div>
+              <p className="section-kicker">Sua rotina</p>
+              <h2>Minhas tarefas</h2>
+            </div>
+            {!loading && <span className="task-count">{tarefas.length}</span>}
           </div>
 
-          <div>
-            <label htmlFor="dataEntrega">Prazo:</label>
-            <input
-              id="dataEntrega"
-              name="dataEntrega"
-              type="date"
-              value={dataEntrega}
-              onChange={(e) => setDataEntrega(e.target.value)}
-              required
-            />
-          </div>
-        </div>
+          {loading ? (
+            <div className="task-list">
+              {[1, 2, 3].map((item) => (
+                <article className="task-card task-skeleton" key={item}>
+                  <div className="skeleton-line skeleton-title" />
+                  <div className="skeleton-line skeleton-short" />
+                  <div className="skeleton-line skeleton-meta" />
+                </article>
+              ))}
+            </div>
+          ) : tarefas.length === 0 ? (
+            <div className="tasks-empty">
+              <div className="tasks-empty-icon" aria-hidden="true">✓</div>
+              <h3>Nenhuma tarefa por aqui</h3>
+              <p>Crie sua primeira tarefa para começar a organizar sua rotina.</p>
+            </div>
+          ) : (
+            <div className="task-list">
+              {tarefas.map((tarefa) => {
+                const concluida = ['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status);
+                const prioridadeClass = (tarefa.prioridade || 'MEDIA').toLowerCase();
+                const statusClass = concluida ? 'concluida' : 'pendente';
 
-        <button type="submit" style={{ padding: '8px 16px', cursor: 'pointer' }}>Criar Tarefa</button>
-      </form>
+                return (
+                  <article className={`task-card ${statusClass}`} key={tarefa.id}>
+                    <div className="task-card-top">
+                      <div className="task-title-wrap">
+                        <span className={`task-status-dot ${statusClass}`} aria-hidden="true" />
+                        <div>
+                          <h3>{tarefa.titulo}</h3>
+                          {tarefa.descricao && <p>{tarefa.descricao}</p>}
+                        </div>
+                      </div>
+                      <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
+                        ×
+                      </button>
+                    </div>
 
-      {/* Listagem de Tarefas */}
-      <h3>Minhas Tarefas</h3>
-      {loading ? (
-        <p>Carregando tarefas...</p>
-      ) : (
-        <ul>
-          {tarefas.map((t) => (
-            <li key={t.id} style={{ marginBottom: '15px', padding: '10px', borderBottom: '1px solid #eee' }}>
-              <strong>{t.titulo}</strong> - {t.categoria} | Prioridade: {t.prioridade} | Status: {t.status}
-              <br />
-              <small>Entrega: {t.dataEntrega}</small>
-              <div style={{ marginTop: '5px' }}>
-                {!['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status) && (
-                  <button onClick={() => handleConcluir(t.id)} style={{ marginRight: '10px' }}>
-                    Concluir
-                  </button>
-                )}
-                <button onClick={() => handleDeletar(t.id)} style={{ color: 'red' }}>
-                  Excluir
-                </button>
-              </div>
-            </li>
-          ))}
-        </ul>
-      )}
+                    <div className="task-meta">
+                      <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
+                      <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
+                      <span className="task-date">📅 {formatarData(tarefa.dataEntrega)}</span>
+                    </div>
+
+                    <div className="task-card-bottom">
+                      <span className={`task-status-label ${statusClass}`}>
+                        {labelStatus[tarefa.status] || tarefa.status || 'Pendente'}
+                      </span>
+
+                      {!concluida && (
+                        <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)}>
+                          ✓ Concluir
+                        </button>
+                      )}
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          )}
+        </section>
+      </section>
     </div>
   );
 }
