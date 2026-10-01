@@ -2847,3 +2847,60 @@ body,
     padding-right: 0;
   }
 }
+
+
+/* ===== Salvaguardas finais de responsividade e tema ===== */
+
+/* No modo escuro, a tela inicial de verificação de sessão deve acompanhar o tema. */
+html[data-theme="escuro"] .session-loading {
+  color: #b5c7cd;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(5,184,204,.08), transparent 28%),
+    radial-gradient(circle at 80% 70%, rgba(3,127,140,.08), transparent 30%),
+    #071722;
+}
+
+html[data-theme="escuro"] .session-loader-card {
+  border-color: rgba(42,69,83,.9);
+  background: rgba(12,32,44,.82);
+  box-shadow: 0 24px 70px rgba(0,0,0,.28);
+}
+
+html[data-theme="escuro"] .session-loader-card strong {
+  color: #f3fbfc;
+}
+
+html[data-theme="escuro"] .session-loader-card > span {
+  color: #9bb0ba;
+}
+
+/* Em telas pequenas, os controles do usuário continuam acessíveis. */
+@media (max-width: 767px) {
+  .app-container .sidebar-user {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px 12px;
+    border-top: 1px solid rgba(255,255,255,.08);
+  }
+
+  .app-container .sidebar-user p {
+    display: block;
+    margin: 0;
+    min-width: 0;
+  }
+
+  .app-container .theme-toggle {
+    width: auto;
+    min-height: 34px;
+    margin-bottom: 0;
+    padding-inline: 9px;
+  }
+
+  .app-container .logout-button {
+    width: auto;
+    min-height: 34px;
+    padding: 7px 11px;
+  }
+}
