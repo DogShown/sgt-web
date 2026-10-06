@@ -4,6 +4,8 @@ import Cadastro from './components/Cadastro';
 import Home from './components/Home';
 import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
+import Notificacoes from './components/Notificacoes';
+import Perfil from './components/Perfil';
 import api from './services/api';
 
 function ThemeToggle({ tema, onToggle, className = '' }) {
@@ -68,6 +70,11 @@ export default function App() {
   const handleLoginSucesso = () => {
     const user = localStorage.getItem('sgt_user');
     if (user) setUsuarioLogado(JSON.parse(user));
+  };
+
+  const handleUsuarioAtualizado = (usuarioAtualizado) => {
+    localStorage.setItem('sgt_user', JSON.stringify(usuarioAtualizado));
+    setUsuarioLogado(usuarioAtualizado);
   };
 
   const handleLogout = () => {
@@ -136,7 +143,7 @@ export default function App() {
                 <button type="button" onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
               </li>
               <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-                <button type="button" onClick={() => setAbaAtiva('tarefas')}>Gerenciador de Tarefas</button>
+                <button type="button" onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
               </li>
             </ul>
           </div>
