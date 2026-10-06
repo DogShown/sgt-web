@@ -114,8 +114,8 @@ function GerenciadorTarefas() {
       <header className="tasks-header">
         <div>
           <p className="dashboard-eyebrow">SGT • Organização</p>
-          <h1>Gerenciador de tarefas</h1>
-          <p>Crie, acompanhe e conclua suas atividades em um só lugar.</p>
+          <h1>Tarefas</h1>
+          <p>Organize, acompanhe e conclua suas atividades em um só lugar.</p>
         </div>
         <div className="tasks-summary">
           <span>{tarefas.length}</span>
