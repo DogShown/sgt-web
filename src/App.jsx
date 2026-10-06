@@ -145,11 +145,20 @@ export default function App() {
               <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
                 <button type="button" onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
               </li>
+              <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
+                <button type="button" onClick={() => setAbaAtiva('notificacoes')}>Notificações</button>
+              </li>
+              <li className={abaAtiva === 'perfil' ? 'active' : ''}>
+                <button type="button" onClick={() => setAbaAtiva('perfil')}>Meu perfil</button>
+              </li>
             </ul>
           </div>
 
           <div className="sidebar-user">
-            <p>Usuário: <strong>{usuarioLogado.nome || 'Usuário'}</strong></p>
+            <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('perfil')}>
+              <span className="sidebar-avatar">{(usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
+              <span><small>Usuário</small><strong>{usuarioLogado.nome || 'Usuário'}</strong><em>{usuarioLogado.turma || 'Turma não definida'}</em></span>
+            </button>
             <ThemeToggle tema={tema} onToggle={alternarTema} />
             <button onClick={handleLogout} className="logout-button">Sair</button>
           </div>
@@ -158,7 +167,11 @@ export default function App() {
         <main className="main-content">
           {abaAtiva === 'dashboard'
             ? <Dashboard />
-            : <GerenciadorTarefas onLogout={handleLogout} />}
+            : abaAtiva === 'tarefas'
+              ? <GerenciadorTarefas />
+              : abaAtiva === 'notificacoes'
+                ? <Notificacoes />
+                : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} />}
         </main>
       </div>
     </div>
