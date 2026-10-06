@@ -61,6 +61,26 @@ export default function Dashboard() {
     return { concluidas: concluidas.length, pendentes: pendentes.length, atrasadas: atrasadas.length, taxa, categorias, proximas };
   }, [tarefas]);
 
+
+  const graficoMensal = useMemo(() => {
+    const meses = Array.from({ length: 6 }, (_, i) => {
+      const data = new Date();
+      data.setMonth(data.getMonth() - (5 - i), 1);
+      return { chave: data.getFullYear() + '-' + String(data.getMonth() + 1).padStart(2, '0'), nome: data.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', ''), total: 0, concluidas: 0 };
+    });
+    tarefas.forEach(tarefa => {
+      const chave = tarefa.dataEntrega ? tarefa.dataEntrega.slice(0, 7) : '';
+      const mes = meses.find(item => item.chave === chave);
+      if (mes) {
+        mes.total += 1;
+        if (['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status)) mes.concluidas += 1;
+      }
+    });
+    return meses;
+  }, [tarefas]);
+
+  const maiorBarra = Math.max(...graficoMensal.map(item => item.total), 1);
+
   const categoriasOrdenadas = Object.entries(metricas.categorias)
     .sort(([, quantidadeA], [, quantidadeB]) => quantidadeB - quantidadeA)
     .slice(0, 4);
@@ -88,6 +108,26 @@ export default function Dashboard() {
         <article className="stat-card"><span className="stat-label">Pendentes</span><strong>{carregando ? '—' : metricas.pendentes}</strong><span className="stat-helper">aguardando conclusão</span></article>
         <article className="stat-card stat-card-warning"><span className="stat-label">Atrasadas</span><strong>{carregando ? '—' : metricas.atrasadas}</strong><span className="stat-helper">prazo já ultrapassado</span></article>
         <article className="stat-card stat-card-accent"><span className="stat-label">Taxa de conclusão</span><strong>{carregando ? '—' : `${metricas.taxa}%`}</strong><span className="stat-helper">{periodo === 'mes' ? 'visão atual' : 'visão do semestre'}</span></article>
+      </section>
+
+
+      <section className="dashboard-card dashboard-performance">
+        <div className="card-heading">
+          <div><h2>Desempenho recente</h2><p>Tarefas organizadas nos últimos seis meses</p></div>
+          <span className="chart-caption">Concluídas / totais</span>
+        </div>
+        <div className="performance-chart" aria-label="Gráfico de tarefas por mês">
+          {graficoMensal.map(item => (
+            <div className="performance-column" key={item.chave}>
+              <div className="performance-value">{item.total}</div>
+              <div className="performance-track">
+                <span className="performance-bar" style={{ height: (item.total / maiorBarra) * 100 + '%' }} />
+                {item.total > 0 && <span className="performance-completed" style={{ height: (item.concluidas / item.total) * 100 + '%' }} />}
+              </div>
+              <span className="performance-month">{item.nome}</span>
+            </div>
+          ))}
+        </div>
       </section>
 
       <section className="dashboard-grid">
