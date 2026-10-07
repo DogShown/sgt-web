@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function Home({ onLogin, onCadastro }) {
   return (
-    <main className="home-page">
+    <main id="conteudo-principal" className="home-page">
       <section className="home-hero">
         <header className="public-header">
           <div className="brand-mark">
