@@ -29,7 +29,7 @@ export default function Cadastro({ onVoltarLogin, onCadastroSucesso }) {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" aria-labelledby="cadastro-titulo">
       <section className="auth-brand-panel">
         <div className="brand-mark brand-mark-light"><span>✓</span><strong>SGT</strong></div>
         <div className="auth-brand-copy">
@@ -49,19 +49,19 @@ export default function Cadastro({ onVoltarLogin, onCadastroSucesso }) {
         <div className="auth-card">
           <button type="button" className="back-link" onClick={onVoltarLogin}>← Voltar para o login</button>
           <div className="auth-heading">
-            <h2>Criar sua conta</h2>
+            <h2 id="cadastro-titulo">Criar sua conta</h2>
             <p>Preencha seus dados para começar.</p>
           </div>
 
-          {mensagem && <div className="form-message success">{mensagem}</div>}
-          {erro && <div className="form-message error">{erro}</div>}
+          {mensagem && <div className="form-message success" role="status" aria-live="polite">{mensagem}</div>}
+          {erro && <div className="form-message error" role="alert" aria-live="assertive">{erro}</div>}
 
           <form onSubmit={handleSubmit}>
-            <label className="form-field"><span>Nome completo</span><input type="text" value={nome} onChange={(e) => setNome(e.target.value)} required /></label>
-            <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
-            <label className="form-field"><span>Turma</span><input type="text" value={turma} onChange={(e) => setTurma(e.target.value)} placeholder="Ex.: 3º C" required /></label>
-            <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} minLength={6} required /></label>
-            <button className="btn-primary btn-full" type="submit" disabled={enviando}>{enviando ? 'Criando conta...' : 'Criar conta'}</button>
+            <label className="form-field"><span>Nome completo</span><input id="cadastro-nome" name="nome" autoComplete="name" type="text" value={nome} onChange={(e) => setNome(e.target.value)} required /></label>
+            <label className="form-field"><span>E-mail</span><input id="cadastro-email" name="email" autoComplete="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></label>
+            <label className="form-field"><span>Turma</span><input id="cadastro-turma" name="turma" type="text" value={turma} onChange={(e) => setTurma(e.target.value)} placeholder="Ex.: 3º C" required /></label>
+            <label className="form-field"><span>Senha</span><input id="cadastro-senha" name="senha" autoComplete="new-password" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} minLength={6} required /></label>
+            <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Criando conta...' : 'Criar conta'}</button>
           </form>
 
           <p className="auth-switch">Já possui uma conta? <button type="button" onClick={onVoltarLogin}>Entrar</button></p>
