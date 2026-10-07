@@ -30,7 +30,7 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   };
 
   return (
-    <main className="auth-page" aria-labelledby="login-titulo">
+    <main id="conteudo-principal" className="auth-page" aria-labelledby="login-titulo">
       <section className="auth-brand-panel">
         <div className="brand-mark brand-mark-light"><span>✓</span><strong>SGT</strong></div>
         <div className="auth-brand-copy">
