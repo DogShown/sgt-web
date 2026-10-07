@@ -3341,3 +3341,147 @@ html[data-theme="escuro"] .dashboard-stats .stat-card-icon.warning {
 html[data-theme="escuro"] .push-error {
   color: #fecaca;
 }
+
+
+/* =========================================================
+   Acessibilidade + fluidez
+   ========================================================= */
+
+.skip-link {
+  position: fixed;
+  z-index: 1000;
+  top: 12px;
+  left: 12px;
+  padding: 10px 14px;
+  border-radius: 9px;
+  color: #fff;
+  background: #024059;
+  box-shadow: 0 10px 24px rgba(1,31,46,.2);
+  font-size: .82rem;
+  font-weight: 800;
+  text-decoration: none;
+  transform: translateY(-160%);
+  transition: transform .22s var(--ease-sgt);
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+}
+
+.screen-transition {
+  animation-duration: .42s;
+}
+
+@keyframes sgt-screen-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+:focus-visible {
+  outline: 3px solid rgba(5,184,204,.5);
+  outline-offset: 3px;
+}
+
+.sidebar-menu button:focus-visible,
+.theme-toggle:focus-visible,
+.logout-button:focus-visible,
+.back-link:focus-visible,
+.auth-switch button:focus-visible,
+.forgot-link:focus-visible {
+  box-shadow: 0 0 0 3px rgba(91,213,223,.28);
+}
+
+.period-toggle button[aria-pressed="true"] {
+  color: #fff;
+}
+
+.notification-card:focus-visible {
+  border-color: #037f8c;
+  box-shadow: 0 0 0 3px rgba(5,184,204,.18);
+}
+
+.profile-card .btn-primary:focus-visible,
+.notification-actions button:focus-visible {
+  box-shadow: 0 0 0 3px rgba(5,184,204,.18);
+}
+
+@media (hover: none) {
+  .btn-primary:hover,
+  .btn-outline:hover,
+  .btn-ghost:hover,
+  .stat-card:hover,
+  .dashboard-card:hover,
+  .preview-window:hover,
+  .notification-card:hover,
+  .upcoming-item:hover,
+  .logout-button:hover {
+    transform: none;
+  }
+
+  .stat-card:hover,
+  .dashboard-card:hover,
+  .notification-card:hover {
+    box-shadow: inherit;
+  }
+}
+
+@media (prefers-contrast: more) {
+  .btn-outline,
+  .period-toggle,
+  .form-field input,
+  .form-field select,
+  .form-field textarea,
+  .profile-form input,
+  .dashboard-card,
+  .stat-card,
+  .task-card,
+  .notification-card {
+    border-width: 2px;
+  }
+
+  .dashboard-eyebrow,
+  .home-kicker,
+  .notification-copy strong,
+  .profile-preview-card h2 {
+    font-weight: 800;
+  }
+}
+
+@media (forced-colors: active) {
+  * {
+    box-shadow: none !important;
+  }
+
+  button,
+  input,
+  select,
+  textarea,
+  .notification-card,
+  .dashboard-card,
+  .stat-card,
+  .profile-card {
+    border: 1px solid ButtonText;
+  }
+
+  :focus-visible {
+    outline: 2px solid Highlight;
+  }
+}
+
+html[data-theme="escuro"] .skip-link {
+  color: #071722;
+  background: #8ddce4;
+}
+
+@media (max-width: 767px) {
+  .skip-link {
+    top: 8px;
+    left: 8px;
+  }
+}
