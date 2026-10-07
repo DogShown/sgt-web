@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
+import { pushService } from '../services/pushService';
 
 const STORAGE_KEY = 'sgt_notifications_read';
 const PUSH_SENT_KEY = 'sgt_notifications_push_sent';
@@ -13,7 +14,9 @@ export default function Notificacoes() {
   const [tarefas, setTarefas] = useState([]);
   const [lidas, setLidas] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
   const [carregando, setCarregando] = useState(true);
-  const [pushAtivo, setPushAtivo] = useState(typeof Notification !== 'undefined' && Notification.permission === 'granted');
+  const [pushAtivo, setPushAtivo] = useState(false);
+  const [pushCarregando, setPushCarregando] = useState(false);
+  const [pushErro, setPushErro] = useState('');
 
   useEffect(() => {
     tarefaService.listarPorUsuario().then(dados => setTarefas(Array.isArray(dados) ? dados : [])).catch(() => setTarefas([])).finally(() => setCarregando(false));
@@ -64,11 +67,36 @@ export default function Notificacoes() {
     setLidas(novas);
     localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));
   };
+  useEffect(() => {
+    const verificarPush = async () => {
+      if (!pushService.supported()) return;
+      const registration = await navigator.serviceWorker.getRegistration('/sw.js');
+      const subscription = await registration?.pushManager.getSubscription();
+      setPushAtivo(Boolean(subscription) && Notification.permission === 'granted');
+    };
+    verificarPush().catch(() => {});
+  }, []);
+
   const ativarPush = async () => {
-    if (!('Notification' in window)) return;
-    const permission = await Notification.requestPermission();
-    setPushAtivo(permission === 'granted');
-    if (permission === 'granted') new Notification('SGT', { body: 'Notificações do navegador ativadas neste dispositivo.' });
+    setPushErro('');
+    setPushCarregando(true);
+    try {
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        if (permission !== 'granted') throw new Error('A permissão para notificações não foi concedida.');
+      }
+
+      if (Notification.permission !== 'granted') {
+        throw new Error('As notificações estão bloqueadas neste navegador.');
+      }
+
+      await pushService.ativar();
+      setPushAtivo(true);
+    } catch (error) {
+      setPushErro(error.message || 'Não foi possível ativar as notificações.');
+    } finally {
+      setPushCarregando(false);
+    }
   };
 
   return (
@@ -76,7 +104,7 @@ export default function Notificacoes() {
       <header className="page-header notifications-header">
         <div><p className="dashboard-eyebrow">SGT • Central de avisos</p><h1>Notificações</h1><p>{naoLidas ? naoLidas + ' não lida(s)' : 'Tudo em dia por aqui.'}</p></div>
         <div className="notification-actions">
-          {!pushAtivo && <button className="btn-outline" onClick={ativarPush}>Ativar notificações</button>}
+          {!pushAtivo && <button className="btn-outline" onClick={ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Ativando...' : 'Ativar notificações'}</button>}
           {naoLidas > 0 && <button className="btn-ghost" onClick={marcarTodas}>Marcar todas como lidas</button>}
         </div>
       </header>
@@ -93,7 +121,8 @@ export default function Notificacoes() {
             </button>;
           })}
       </section>
-      <p className="push-note"><strong>Notificações do dispositivo:</strong> o botão acima habilita os avisos do navegador. Para push em segundo plano com o SGT fechado, será necessário configurar Web Push/VAPID no backend.</p>
+      {pushErro && <p className="push-note push-error" role="alert">{pushErro}</p>}
+      <p className="push-note"><strong>Notificações do dispositivo:</strong> ao ativar, o SGT registra este navegador para receber Web Push mesmo quando a página não estiver aberta. O servidor precisa estar com as chaves VAPID configuradas.</p>
     </div>
   );
 }
