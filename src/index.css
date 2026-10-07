@@ -3485,3 +3485,21 @@ html[data-theme="escuro"] .skip-link {
     left: 8px;
   }
 }
+
+
+.task-success-message {
+  margin-bottom: 16px;
+  padding: 11px 13px;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  color: #166534;
+  background: #f0fdf4;
+  font-size: .82rem;
+  animation: sgt-message-in .38s var(--ease-sgt) both;
+}
+
+html[data-theme="escuro"] .task-success-message {
+  border-color: #1e5a3c;
+  color: #b8f1cd;
+  background: #0d2c20;
+}
