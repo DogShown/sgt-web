@@ -30,7 +30,7 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   };
 
   return (
-    <main className="auth-page">
+    <main className="auth-page" aria-labelledby="login-titulo">
       <section className="auth-brand-panel">
         <div className="brand-mark brand-mark-light"><span>✓</span><strong>SGT</strong></div>
         <div className="auth-brand-copy">
@@ -50,17 +50,17 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
         <div className="auth-card">
           <button type="button" className="back-link" onClick={onVoltarHome}>← Voltar para início</button>
           <div className="auth-heading">
-            <h2>Bem-vindo de volta!</h2>
+            <h2 id="login-titulo">Bem-vindo de volta!</h2>
             <p>Entre na sua conta para continuar.</p>
           </div>
 
-          {erro && <div className="form-message error">{erro}</div>}
+          {erro && <div className="form-message error" role="alert" aria-live="assertive">{erro}</div>}
 
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit} aria-busy={enviando}>
             <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required /></label>
             <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="current-password" required /></label>
             <div className="form-options"><label><input type="checkbox" /> <span>Lembrar de mim</span></label><button type="button" className="forgot-link" disabled>Esqueci minha senha</button></div>
-            <button className="btn-primary btn-full" type="submit" disabled={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
+            <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
           </form>
 
           <p className="auth-switch">Ainda não possui uma conta? <button type="button" onClick={onCadastro}>Criar conta</button></p>
