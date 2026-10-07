@@ -13,8 +13,6 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'SGT';
   const options = {
     body: data.body || 'Você recebeu uma nova notificação.',
-    icon: '/favicon.svg',
-    badge: '/favicon.svg',
     data: { url: data.url || '/notificacoes' },
     vibrate: [100, 50, 100],
   };
