@@ -136,7 +136,7 @@ function GerenciadorTarefas() {
             <span className="task-form-icon" aria-hidden="true">+</span>
           </div>
 
-          <form className="task-form" onSubmit={handleSubmit}>
+          <form className="task-form" onSubmit={handleSubmit} aria-busy={criando}>
             <label className="form-field">
               <span>Título</span>
               <input
@@ -260,7 +260,7 @@ function GerenciadorTarefas() {
                       </span>
 
                       {!concluida && (
-                        <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)}>
+                        <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
                           ✓ Concluir
                         </button>
                       )}
