@@ -3293,3 +3293,37 @@ html[data-theme="escuro"] .push-note strong {
     width: 28px;
   }
 }
+
+
+.dashboard-stats .stat-card-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 12px;
+  border-radius: 9px;
+  font-size: .9rem;
+  font-weight: 800;
+}
+
+.dashboard-stats .stat-card-icon.success,
+.dashboard-stats .stat-card-icon.accent {
+  color: #037f8c;
+  background: rgba(3,127,140,.1);
+}
+
+.dashboard-stats .stat-card-icon.warning {
+  color: #d97706;
+  background: rgba(245,158,11,.12);
+}
+
+html[data-theme="escuro"] .dashboard-stats .stat-card-icon.success,
+html[data-theme="escuro"] .dashboard-stats .stat-card-icon.accent {
+  color: #8ddce4;
+  background: rgba(5,184,204,.1);
+}
+
+html[data-theme="escuro"] .dashboard-stats .stat-card-icon.warning {
+  color: #fbbf24;
+  background: rgba(245,158,11,.12);
+}
