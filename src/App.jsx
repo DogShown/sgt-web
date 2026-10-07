@@ -105,6 +105,7 @@ export default function App() {
   if (!usuarioLogado) {
     return (
       <div className="screen-transition" key={screenKey}>
+        <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
         <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
 
         {telaPublica === 'login' && (
