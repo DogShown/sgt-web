@@ -107,9 +107,9 @@ export default function Dashboard() {
           <p>Visão geral das suas tarefas{usuario.turma ? ` — Turma ${usuario.turma}` : ''}</p>
         </div>
 
-        <div className="period-toggle" aria-label="Período do dashboard">
-          <button type="button" className={periodo === 'mes' ? 'active' : ''} onClick={() => setPeriodo('mes')}>Mês</button>
-          <button type="button" className={periodo === 'semestre' ? 'active' : ''} onClick={() => setPeriodo('semestre')}>Semestre</button>
+        <div className="period-toggle" role="group" aria-label="Período do dashboard">
+          <button type="button" aria-pressed={periodo === 'mes'} className={periodo === 'mes' ? 'active' : ''} onClick={() => setPeriodo('mes')}>Mês</button>
+          <button type="button" aria-pressed={periodo === 'semestre'} className={periodo === 'semestre' ? 'active' : ''} onClick={() => setPeriodo('semestre')}>Semestre</button>
         </div>
       </header>
 
