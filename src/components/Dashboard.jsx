@@ -116,10 +116,10 @@ export default function Dashboard() {
       {erro && <div className="dashboard-alert">{erro}</div>}
 
       <section className="dashboard-stats">
-        <article className="stat-card"><span className="stat-label">Concluídas</span><strong>{carregando ? '—' : metricas.concluidas}</strong><span className="stat-helper">tarefas finalizadas</span></article>
-        <article className="stat-card"><span className="stat-label">Pendentes</span><strong>{carregando ? '—' : metricas.pendentes}</strong><span className="stat-helper">aguardando conclusão</span></article>
-        <article className="stat-card stat-card-warning"><span className="stat-label">Atrasadas</span><strong>{carregando ? '—' : metricas.atrasadas}</strong><span className="stat-helper">prazo já ultrapassado</span></article>
-        <article className="stat-card stat-card-accent"><span className="stat-label">Taxa de conclusão</span><strong>{carregando ? '—' : `${metricas.taxa}%`}</strong><span className="stat-helper">{periodo === 'mes' ? 'visão atual' : 'visão do semestre'}</span></article>
+        <article className="stat-card"><span className="stat-card-icon success" aria-hidden="true">✓</span><span className="stat-label">Concluídas</span><strong>{carregando ? '—' : metricas.concluidas}</strong><span className="stat-helper">tarefas finalizadas</span></article>
+        <article className="stat-card"><span className="stat-card-icon accent" aria-hidden="true">◷</span><span className="stat-label">Pendentes</span><strong>{carregando ? '—' : metricas.pendentes}</strong><span className="stat-helper">aguardando conclusão</span></article>
+        <article className="stat-card stat-card-warning"><span className="stat-card-icon warning" aria-hidden="true">!</span><span className="stat-label">Atrasadas</span><strong>{carregando ? '—' : metricas.atrasadas}</strong><span className="stat-helper">prazo já ultrapassado</span></article>
+        <article className="stat-card stat-card-accent"><span className="stat-card-icon accent" aria-hidden="true">↗</span><span className="stat-label">Taxa de conclusão</span><strong>{carregando ? '—' : `${metricas.taxa}%`}</strong><span className="stat-helper">{periodo === 'mes' ? 'visão atual' : 'visão do semestre'}</span></article>
       </section>
 
 
