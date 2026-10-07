@@ -40,20 +40,28 @@ export default function Dashboard() {
 
   const metricas = useMemo(() => {
     const hoje = inicioDoDia();
-    const concluidas = tarefas.filter((tarefa) => tarefa.status === 'CONCLUIDA');
-    const pendentes = tarefas.filter((tarefa) => tarefa.status === 'PENDENTE');
+    const inicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const inicioSemestre = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    const tarefasDoPeriodo = tarefas.filter((tarefa) => {
+      if (!tarefa.dataEntrega) return false;
+      const [ano, mes, dia] = tarefa.dataEntrega.split('-').map(Number);
+      const dataEntrega = new Date(ano, mes - 1, dia);
+      return periodo === 'mes' ? dataEntrega >= inicioPeriodo && dataEntrega <= hoje : dataEntrega >= inicioSemestre && dataEntrega <= hoje;
+    });
+    const concluidas = tarefasDoPeriodo.filter((tarefa) => ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status));
+    const pendentes = tarefasDoPeriodo.filter((tarefa) => tarefa.status === 'PENDENTE');
     const atrasadas = pendentes.filter((tarefa) => {
       if (!tarefa.dataEntrega) return false;
       const [ano, mes, dia] = tarefa.dataEntrega.split('-').map(Number);
       return new Date(ano, mes - 1, dia) < hoje;
     });
     const taxa = tarefas.length ? Math.round((concluidas.length / tarefas.length) * 100) : 0;
-    const categorias = tarefas.reduce((acc, tarefa) => {
+    const categorias = tarefasDoPeriodo.reduce((acc, tarefa) => {
       const categoria = tarefa.categoria || 'Outras';
       acc[categoria] = (acc[categoria] || 0) + 1;
       return acc;
     }, {});
-    const proximas = tarefas
+    const proximas = tarefasDoPeriodo
       .filter((tarefa) => tarefa.status === 'PENDENTE' && tarefa.dataEntrega)
       .sort((a, b) => a.dataEntrega.localeCompare(b.dataEntrega))
       .slice(0, 5);
