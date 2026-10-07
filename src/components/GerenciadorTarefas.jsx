@@ -30,6 +30,7 @@ function GerenciadorTarefas() {
   const [tarefas, setTarefas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState('');
+  const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
 
   const [titulo, setTitulo] = useState('');
@@ -66,6 +67,7 @@ function GerenciadorTarefas() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
+    setSucesso('');
     setCriando(true);
 
     const novaTarefaDTO = {
@@ -79,6 +81,7 @@ function GerenciadorTarefas() {
     try {
       await tarefaService.criar(novaTarefaDTO);
       limparFormulario();
+      setSucesso('Tarefa criada com sucesso.');
       await carregarTarefas();
     } catch (err) {
       setErro(err.response?.data?.message || 'Erro ao criar a tarefa.');
@@ -90,7 +93,9 @@ function GerenciadorTarefas() {
   const handleConcluir = async (id) => {
     try {
       setErro('');
+      setSucesso('');
       await tarefaService.concluir(id);
+      setSucesso('Tarefa marcada como concluída.');
       await carregarTarefas();
     } catch (err) {
       setErro('Erro ao concluir a tarefa.');
@@ -124,6 +129,7 @@ function GerenciadorTarefas() {
       </header>
 
       {erro && <div className="dashboard-alert" role="alert">{erro}</div>}
+      {sucesso && <div className="task-success-message" role="status" aria-live="polite">{sucesso}</div>}
 
       <section className="tasks-layout">
         <article className="task-form-card">
@@ -251,7 +257,7 @@ function GerenciadorTarefas() {
                     <div className="task-meta">
                       <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
                       <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
-                      <span className="task-date">📅 {formatarData(tarefa.dataEntrega)}</span>
+                      <span className="task-date"><span aria-hidden="true">📅</span> {formatarData(tarefa.dataEntrega)}</span>
                     </div>
 
                     <div className="task-card-bottom">
