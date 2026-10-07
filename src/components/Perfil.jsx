@@ -1,8 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { perfilService } from '../services/perfilService';
 
-const turmas = ['INF1AM', 'INF1BM', 'INF2AM', 'INF2BM', 'INF3AM', 'INF3BM'];
-
 export default function Perfil({ usuario, onUsuarioAtualizado }) {
   const [nome, setNome] = useState(usuario?.nome || '');
   const [turma, setTurma] = useState(usuario?.turma || '');
@@ -59,8 +57,7 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
             <label className="form-field"><span>E-mail</span><input value={usuario?.email || ''} disabled /></label>
             <label className="form-field">
               <span>Turma</span>
-              <input list="sgt-turmas" value={turma} onChange={e => setTurma(e.target.value.toUpperCase())} placeholder="Ex.: INF3BM" required maxLength={50} />
-              <datalist id="sgt-turmas">{turmas.map(item => <option value={item} key={item} />)}</datalist>
+              <input value={turma} onChange={e => setTurma(e.target.value.toUpperCase())} placeholder="Ex.: INF3BM" required maxLength={50} />
               <small className="field-help">Padrão técnico: curso + ano + turma + período. Ex.: INF3BM.</small>
             </label>
             <button className="btn-primary btn-full" type="submit" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'}</button>
