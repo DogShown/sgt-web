@@ -3327,3 +3327,17 @@ html[data-theme="escuro"] .dashboard-stats .stat-card-icon.warning {
   color: #fbbf24;
   background: rgba(245,158,11,.12);
 }
+
+
+.notification-actions button:disabled {
+  opacity: .6;
+  cursor: wait;
+}
+
+.push-error {
+  color: #b91c1c;
+}
+
+html[data-theme="escuro"] .push-error {
+  color: #fecaca;
+}
