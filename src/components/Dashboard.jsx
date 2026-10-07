@@ -40,13 +40,17 @@ export default function Dashboard() {
 
   const metricas = useMemo(() => {
     const hoje = inicioDoDia();
-    const inicioPeriodo = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
-    const inicioSemestre = new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    const inicioPeriodo = periodo === 'mes'
+      ? new Date(hoje.getFullYear(), hoje.getMonth(), 1)
+      : new Date(hoje.getFullYear(), hoje.getMonth() - 5, 1);
+    const fimPeriodo = periodo === 'mes'
+      ? new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0)
+      : new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0);
     const tarefasDoPeriodo = tarefas.filter((tarefa) => {
       if (!tarefa.dataEntrega) return false;
       const [ano, mes, dia] = tarefa.dataEntrega.split('-').map(Number);
       const dataEntrega = new Date(ano, mes - 1, dia);
-      return periodo === 'mes' ? dataEntrega >= inicioPeriodo && dataEntrega <= hoje : dataEntrega >= inicioSemestre && dataEntrega <= hoje;
+      return dataEntrega >= inicioPeriodo && dataEntrega <= fimPeriodo;
     });
     const concluidas = tarefasDoPeriodo.filter((tarefa) => ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status));
     const pendentes = tarefasDoPeriodo.filter((tarefa) => tarefa.status === 'PENDENTE');
