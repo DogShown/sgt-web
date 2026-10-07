@@ -134,24 +134,25 @@ export default function App() {
 
   return (
     <div className="screen-transition" key={screenKey}>
+      <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
       <div className="app-container">
-        <aside className="sidebar">
+        <aside className="sidebar" aria-label="Barra lateral do SGT">
           <div>
             <div className="sidebar-header"><h2>SGT</h2></div>
-            <ul className="sidebar-menu">
+            <nav aria-label="Navegação principal"><ul className="sidebar-menu">
               <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
-                <button type="button" onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
+                <button type="button" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
               </li>
               <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-                <button type="button" onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
+                <button type="button" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
               </li>
               <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
-                <button type="button" onClick={() => setAbaAtiva('notificacoes')}>Notificações</button>
+                <button type="button" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>Notificações</button>
               </li>
               <li className={abaAtiva === 'perfil' ? 'active' : ''}>
-                <button type="button" onClick={() => setAbaAtiva('perfil')}>Meu perfil</button>
+                <button type="button" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>Meu perfil</button>
               </li>
-            </ul>
+            </ul></nav>
           </div>
 
           <div className="sidebar-user">
@@ -164,7 +165,7 @@ export default function App() {
           </div>
         </aside>
 
-        <main className="main-content">
+        <main id="conteudo-principal" className="main-content">
           {abaAtiva === 'dashboard'
             ? <Dashboard />
             : abaAtiva === 'tarefas'
