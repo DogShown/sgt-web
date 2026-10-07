@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
 const STORAGE_KEY = 'sgt_notifications_read';
+const PUSH_SENT_KEY = 'sgt_notifications_push_sent';
 const dataLocal = (data) => {
   if (!data) return null;
   const [y, m, d] = data.split('-').map(Number);
@@ -32,6 +33,25 @@ export default function Notificacoes() {
       return [];
     }).slice(0, 20);
   }, [tarefas]);
+
+  useEffect(() => {
+    if (!pushAtivo || notificacoes.length === 0) return;
+
+    const enviadas = JSON.parse(localStorage.getItem(PUSH_SENT_KEY) || '[]');
+    const novasParaAvisar = notificacoes.filter(n => !lidas.includes(n.id) && !enviadas.includes(n.id)).slice(0, 3);
+
+    if (novasParaAvisar.length === 0) return;
+
+    novasParaAvisar.forEach((n) => {
+      new Notification(n.titulo, {
+        body: n.texto,
+        tag: n.id
+      });
+    });
+
+    const atualizadas = [...new Set([...enviadas, ...novasParaAvisar.map(n => n.id)])].slice(-30);
+    localStorage.setItem(PUSH_SENT_KEY, JSON.stringify(atualizadas));
+  }, [notificacoes, lidas, pushAtivo]);
 
   const naoLidas = notificacoes.filter(n => !lidas.includes(n.id)).length;
   const marcarLida = (id) => {
