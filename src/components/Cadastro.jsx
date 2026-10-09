@@ -22,7 +22,18 @@ export default function Cadastro({ onVoltarLogin, onCadastroSucesso }) {
       setSenha('');
       setTimeout(() => onCadastroSucesso?.(), 700);
     } catch (err) {
-      setErro(err.response?.data?.message || err.response?.data || 'Não foi possível realizar o cadastro.');
+      const dados = err.response?.data;
+      const mensagemServidor = typeof dados === 'string' ? dados : dados?.message;
+
+      if (mensagemServidor) {
+        setErro(mensagemServidor);
+      } else if (!err.response) {
+        setErro(
+          'Não foi possível conectar à API do SGT. Confira se o Backend está iniciado e se o endereço do sistema está acessível pela rede.'
+        );
+      } else {
+        setErro(`O cadastro não foi concluído (HTTP ${err.response.status}). Confira os dados e tente novamente.`);
+      }
     } finally {
       setEnviando(false);
     }
