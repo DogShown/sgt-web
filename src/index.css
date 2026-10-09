@@ -3503,3 +3503,181 @@ html[data-theme="escuro"] .task-success-message {
   color: #b8f1cd;
   background: #0d2c20;
 }
+
+/* =========================================================
+   Refinamento pontual do dashboard — mantém a identidade SGT
+   ========================================================= */
+.dashboard-page {
+  width: 100%;
+  padding-inline: clamp(16px, 2.5vw, 32px);
+  color: var(--theme-text, #334155);
+}
+
+.dashboard-header {
+  align-items: center;
+  gap: 18px;
+}
+
+.dashboard-header h1 {
+  font-size: clamp(1.35rem, 2vw, 1.75rem);
+  line-height: 1.25;
+  text-wrap: balance;
+}
+
+.dashboard-stats .stat-card,
+.dashboard-card {
+  border-color: var(--theme-border, #e2e8f0);
+  border-radius: 14px;
+  background-color: var(--theme-surface, #fff);
+  box-shadow: 0 4px 16px var(--theme-shadow, rgba(1, 31, 46, .06));
+}
+
+.dashboard-stats .stat-card {
+  min-width: 0;
+  padding: 18px;
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease;
+}
+
+.dashboard-stats .stat-card strong {
+  overflow-wrap: anywhere;
+  font-variant-numeric: tabular-nums;
+}
+
+.dashboard-card {
+  min-width: 0;
+  padding: clamp(18px, 2vw, 24px);
+  transition:
+    transform .22s ease,
+    box-shadow .22s ease,
+    border-color .22s ease;
+}
+
+.dashboard-card .card-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.dashboard-stats .stat-card:focus-within,
+.dashboard-card:focus-within {
+  outline: 2px solid var(--accent-teal, #037f8c);
+  outline-offset: 3px;
+}
+
+.period-toggle {
+  flex-shrink: 0;
+  border-color: var(--theme-border, #cbd5e1);
+  background: var(--theme-surface, #fff);
+}
+
+.period-toggle button {
+  min-height: 38px;
+  transition: color .18s ease, background-color .18s ease;
+}
+
+.period-toggle button:focus-visible {
+  outline: 2px solid var(--accent-teal, #037f8c);
+  outline-offset: 2px;
+}
+
+html[data-theme="escuro"] .dashboard-stats .stat-card,
+html[data-theme="escuro"] .dashboard-card,
+html[data-theme="escuro"] .period-toggle {
+  border-color: var(--theme-border);
+  background-color: var(--theme-surface);
+}
+
+html[data-theme="escuro"] .dashboard-header h1,
+html[data-theme="escuro"] .dashboard-stats .stat-card strong,
+html[data-theme="escuro"] .dashboard-card .card-heading h2 {
+  color: var(--theme-text-strong);
+}
+
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .dashboard-stats .stat-card:hover,
+  .dashboard-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(3, 127, 140, .35);
+    box-shadow: 0 10px 24px var(--theme-shadow, rgba(1, 31, 46, .08));
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1100px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-page {
+    padding-top: 24px;
+  }
+}
+
+@media (min-width: 420px) and (max-width: 767px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+
+  .dashboard-stats .stat-card {
+    min-height: 124px;
+    padding: 16px;
+  }
+
+  .dashboard-stats .stat-card .stat-helper {
+    line-height: 1.4;
+  }
+
+  .dashboard-header {
+    gap: 14px;
+  }
+
+  .period-toggle {
+    align-self: stretch;
+  }
+
+  .period-toggle button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 419px) {
+  .dashboard-stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-stats .stat-card {
+    min-height: 112px;
+  }
+
+  .dashboard-page {
+    padding-inline: 14px;
+  }
+
+  .dashboard-card {
+    padding: 16px;
+  }
+
+  .upcoming-item {
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .upcoming-item time {
+    max-width: 94px;
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dashboard-stats .stat-card,
+  .dashboard-card,
+  .period-toggle button {
+    transition: none !important;
+  }
+}
+
