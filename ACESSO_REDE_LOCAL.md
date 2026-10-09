@@ -10,6 +10,7 @@ Este modo serve para demonstrações e testes na mesma rede Wi-Fi/LAN. O computa
    `npm install`
    `npm run dev -- --host 0.0.0.0`
 4. No Windows, execute `ipconfig` e localize o endereço IPv4 da placa conectada à mesma rede, por exemplo `192.168.0.25`.
+5. Confira se existe um arquivo `.env` ou `.env.local` no Frontend. Para este modo com proxy Vite, não deixe `VITE_API_URL=http://localhost:8080/api`; remova essa variável ou defina `VITE_API_URL=/api`. Caso contrário, o navegador do outro computador tentará acessar o próprio localhost dele.
 
 ## 2. No outro computador
 
