@@ -52,6 +52,36 @@ export default function Home({ onLogin, onCadastro }) {
           </div>
         </div>
       </section>
+
+      {/* Seção de Informações do Projeto e Integrantes com letras menores */}
+      <footer className="home-footer-info" style={{ padding: '1.5rem 1rem', background: '#f8f9fa', borderTop: '1px solid #e9ecef', marginTop: '2rem', fontSize: '0.85rem' }}>
+        <div style={{ maxWidth: '1200px', margin: '0 auto', textAlign: 'center' }}>
+          <h4 style={{ marginBottom: '0.3rem', color: '#333', fontSize: '0.95rem' }}>Projeto: SGT - Sistema de Gerenciamento de Tarefas</h4>
+          <p style={{ marginBottom: '1rem', color: '#666', fontSize: '0.8rem' }}><strong>Turma:</strong> INF2GM | <strong>Grupo:</strong> 2</p>
+          
+          <h5 style={{ marginBottom: '0.75rem', color: '#444', fontSize: '0.85rem' }}>Equipe do Projeto</h5>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '0.75rem', textAlign: 'left' }}>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 7</strong> - Ewerton Vagner da Silva<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 99750 | Product Owner</span>
+            </li>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 28</strong> - Stephany dos Santos Bandeira<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 100423 | Scrum Master</span>
+            </li>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 1</strong> - Antônio Nunes da Silva<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 99080 | Time de Desenvolvimento</span>
+            </li>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 4</strong> - Deryk Henry dos Santos Silva<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 99760 | Time de Desenvolvimento</span>
+            </li>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 5</strong> - Eloá Raquel Pereira Silva<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 95281 | Time de Desenvolvimento</span>
+            </li>
+            <li style={{ background: '#fff', padding: '0.5rem 0.75rem', borderRadius: '6px', border: '1px solid #ddd' }}>
+              <strong>N° 6</strong> - Ester Beserra dos Santos<br /><span style={{ fontSize: '0.75rem', color: '#555' }}>RM: 99877 | Time de Desenvolvimento</span>
+            </li>
+          </ul>
+        </div>
+      </footer>
     </main>
   );
 }
