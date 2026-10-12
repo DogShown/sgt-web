@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
+import logo from '../assets/logo.jpg';
 
 const formatarData = (data) => {
   if (!data) return 'Sem prazo';

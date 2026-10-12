@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { loginService } from '../services/loginServices';
+import logo from '../assets/logo.jpg';
 
 export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   const [email, setEmail] = useState('');
@@ -32,7 +33,8 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   return (
     <main id="conteudo-principal" className="auth-page" aria-labelledby="login-titulo">
       <section className="auth-brand-panel">
-        <div className="brand-mark brand-mark-light"><span>✓</span><strong>SGT</strong></div>
+        <img className="auth-brand-logo" src={logo} alt="SGT - Sistema de Gestão de Tarefas" />
+
         <div className="auth-brand-copy">
           <span className="home-kicker light">Sua rotina, mais organizada</span>
           <h1>Menos desorganização. Mais foco nos estudos.</h1>

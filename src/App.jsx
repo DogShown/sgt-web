@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Login from './components/Login';
 import Cadastro from './components/Cadastro';
 import Home from './components/Home';
@@ -106,7 +106,9 @@ export default function App() {
     return (
       <div className="screen-transition" key={screenKey}>
         <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
-        <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
+        {telaPublica !== 'home' && (
+          <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
+        )}
 
         {telaPublica === 'login' && (
           <Login
@@ -127,6 +129,7 @@ export default function App() {
           <Home
             onLogin={() => setTelaPublica('login')}
             onCadastro={() => setTelaPublica('cadastro')}
+            themeToggle={<ThemeToggle className="landing-theme-toggle" tema={tema} onToggle={alternarTema} />}
           />
         )}
       </div>

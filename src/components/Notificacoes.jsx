@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 import { pushService } from '../services/pushService';
+import logo from '../assets/logo.jpg';
 
 const STORAGE_KEY = 'sgt_notifications_read';
 const dataLocal = (data) => {

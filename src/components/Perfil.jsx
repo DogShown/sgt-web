@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { perfilService } from '../services/perfilService';
+import logo from '../assets/logo.jpg';
 
 export default function Perfil({ usuario, onUsuarioAtualizado }) {
   const [nome, setNome] = useState(usuario?.nome || '');

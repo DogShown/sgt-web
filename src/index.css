@@ -1873,6 +1873,13 @@ button:disabled {
   background: linear-gradient(160deg, #024059 0%, #025570 50%, #037f8c 100%);
 }
 
+.auth-brand-logo {
+  display: block;
+  width: 48px;
+  height: auto;
+  border-radius: 12px;
+}
+
 .auth-page .auth-brand-panel::before,
 .auth-page .auth-brand-panel::after {
   display: none;
@@ -3681,3 +3688,371 @@ html[data-theme="escuro"] .dashboard-card .card-heading h2 {
   }
 }
 
+/* ===== Página inicial ===== */
+.landing-page {
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  background: #f7f9fb;
+  color: #10182d;
+}
+
+.landing-hero {
+  min-height: calc(100vh - 48px);
+  min-height: calc(100svh - 48px);
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  border-top: 4px solid #037f8c;
+  background:
+    radial-gradient(ellipse at 78% 24%, rgba(3,127,140,.06), transparent 32%),
+    #f7f9fb;
+}
+
+.landing-header {
+  min-height: 62px;
+  padding: 0 clamp(20px, 2.5vw, 42px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e2e8ef;
+}
+
+.landing-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.landing-brand-logo {
+  display: block;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+}
+
+.landing-brand-copy strong,
+.landing-brand-copy small {
+  display: block;
+}
+
+.landing-brand-copy strong {
+  color: #024059;
+  font-size: .75rem;
+}
+
+.landing-brand-copy small {
+  margin-top: 2px;
+  color: #71808b;
+  font-size: .62rem;
+}
+
+.landing-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.landing-header .landing-login {
+  min-height: 34px;
+  padding: 7px 16px;
+  color: #024059;
+  background: #fff;
+  border-color: #d3dce7;
+  font-size: .75rem;
+}
+
+.landing-header .landing-login:hover,
+.landing-existing-account:hover {
+  color: #024059;
+  background: #f0f7f8;
+}
+
+.landing-theme-toggle {
+  min-height: 34px;
+  padding: 6px 9px;
+  border-color: #d3dce7;
+  color: #526878;
+  background: #fff;
+}
+
+.landing-theme-toggle:hover {
+  color: #024059;
+  border-color: #b8cbd3;
+  background: #f0f7f8;
+}
+
+.landing-content {
+  width: min(100% - 40px, 680px);
+  margin: auto;
+  padding: 64px 0 72px;
+  text-align: center;
+  animation: sgt-content-rise .72s var(--ease-sgt) .05s both;
+}
+
+.landing-kicker {
+  display: inline-flex;
+  align-items: center;
+  min-height: 26px;
+  padding: 5px 14px;
+  border: 1px solid rgba(3,127,140,.16);
+  border-radius: 999px;
+  color: #037f8c;
+  background: rgba(3,127,140,.07);
+  font-size: .65rem;
+  font-weight: 800;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.landing-content h1 {
+  margin: 24px 0 18px;
+  color: #10182d;
+  font-size: clamp(2.25rem, 4.2vw, 3.45rem);
+  font-weight: 800;
+  line-height: 1.12;
+  letter-spacing: -.045em;
+  text-wrap: balance;
+}
+
+.landing-content h1 span {
+  display: block;
+  color: #037f8c;
+}
+
+.landing-content > p {
+  max-width: 470px;
+  margin: 0 auto;
+  color: #71808b;
+  font-size: .9rem;
+  line-height: 1.7;
+}
+
+.landing-actions {
+  margin-top: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.landing-actions .landing-signup,
+.landing-actions .landing-existing-account {
+  min-height: 42px;
+  padding: 11px 20px;
+  font-size: .75rem;
+}
+
+.landing-signup {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  box-shadow: 0 8px 18px rgba(3,127,140,.18);
+}
+
+.landing-signup span {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.landing-actions .landing-existing-account {
+  border-color: #d3dce7;
+  color: #024059;
+  background: #fff;
+}
+
+.landing-footer {
+  min-height: 48px;
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-top: 1px solid #e2e8ef;
+  color: #8392a3;
+  font-size: .68rem;
+  text-align: center;
+}
+
+.landing-footer span {
+  color: #037f8c;
+}
+
+.landing-project-footer {
+  margin-top: 20px;
+  padding: 28px clamp(20px, 5vw, 64px) 14px;
+  display: block;
+  text-align: left;
+}
+
+.landing-project-info {
+  width: min(100%, 1100px);
+  margin: 0;
+}
+
+.landing-project-info h2 {
+  margin: 0;
+  color: #344a56;
+  font-size: .9rem;
+}
+
+.landing-project-info > p {
+  margin: 6px 0 20px;
+  color: #71808b;
+  font-size: .78rem;
+}
+
+.landing-project-info > p span {
+  padding: 0 5px;
+}
+
+.landing-project-info h3 {
+  margin: 0 0 10px;
+  color: #526878;
+  font-size: .8rem;
+}
+
+.landing-team-list {
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+  gap: 8px;
+  list-style: none;
+  text-align: left;
+}
+
+.landing-team-list li {
+  padding: 10px 12px;
+  display: grid;
+  gap: 4px;
+  border: 1px solid #e2e8ef;
+  border-radius: 8px;
+  background: #fff;
+  font-size: .75rem;
+}
+
+.landing-team-list li strong {
+  color: #344a56;
+}
+
+.landing-team-list li span {
+  color: #71808b;
+  font-size: .7rem;
+}
+
+.landing-project-footer .landing-footer-note {
+  margin: 20px 0 0;
+  color: #8392a3;
+  font-size: .68rem;
+  text-align: left;
+}
+
+html[data-theme="escuro"] .landing-page {
+  background: #071722;
+  color: #e7f2f4;
+}
+
+html[data-theme="escuro"] .landing-hero {
+  background:
+    radial-gradient(ellipse at 78% 24%, rgba(5,184,204,.08), transparent 32%),
+    #071722;
+}
+
+html[data-theme="escuro"] .landing-header,
+html[data-theme="escuro"] .landing-footer {
+  border-color: #1f3947;
+}
+
+html[data-theme="escuro"] .landing-project-info h2,
+html[data-theme="escuro"] .landing-project-info h3,
+html[data-theme="escuro"] .landing-team-list li strong {
+  color: #c3dbe0;
+}
+
+html[data-theme="escuro"] .landing-project-info > p,
+html[data-theme="escuro"] .landing-team-list li span {
+  color: #9bb0ba;
+}
+
+html[data-theme="escuro"] .landing-team-list li {
+  border-color: #1f3947;
+  background: #0c202c;
+}
+
+html[data-theme="escuro"] .landing-brand-copy strong,
+html[data-theme="escuro"] .landing-content h1 {
+  color: #f3fbfc;
+}
+
+html[data-theme="escuro"] .landing-brand-copy small,
+html[data-theme="escuro"] .landing-content > p,
+html[data-theme="escuro"] .landing-footer {
+  color: #9bb0ba;
+}
+
+html[data-theme="escuro"] .landing-header .landing-login,
+html[data-theme="escuro"] .landing-actions .landing-existing-account,
+html[data-theme="escuro"] .landing-theme-toggle {
+  border-color: #315a67;
+  color: #c3dbe0;
+  background: #0c202c;
+}
+
+html[data-theme="escuro"] .landing-header .landing-login:hover,
+html[data-theme="escuro"] .landing-actions .landing-existing-account:hover,
+html[data-theme="escuro"] .landing-theme-toggle:hover {
+  background: #102936;
+}
+
+@media (max-width: 560px) {
+  .landing-header {
+    min-height: 58px;
+    padding-inline: 16px;
+  }
+
+  .landing-brand-logo {
+    width: 28px;
+    height: 28px;
+  }
+
+  .landing-brand-copy small {
+    font-size: .58rem;
+  }
+
+  .landing-theme-toggle {
+    width: 34px;
+    padding: 6px;
+    justify-content: center;
+  }
+
+  .landing-theme-toggle .theme-toggle-label {
+    display: none;
+  }
+
+  .landing-content {
+    padding: 56px 0;
+  }
+
+  .landing-content h1 {
+    font-size: clamp(2rem, 8vw, 2.6rem);
+  }
+
+  .landing-content > p {
+    font-size: .85rem;
+  }
+
+  .landing-actions {
+    flex-direction: column;
+  }
+
+  .landing-actions button {
+    width: min(100%, 280px);
+    justify-content: center;
+  }
+
+  .landing-footer {
+    min-height: 44px;
+  }
+}

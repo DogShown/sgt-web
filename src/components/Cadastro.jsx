@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { loginService } from '../services/loginServices';
+import logo from '../assets/logo.jpg';
 
 export default function Cadastro({ onVoltarLogin, onCadastroSucesso }) {
   const [nome, setNome] = useState('');
@@ -42,7 +43,8 @@ export default function Cadastro({ onVoltarLogin, onCadastroSucesso }) {
   return (
     <main id="conteudo-principal" className="auth-page" aria-labelledby="cadastro-titulo">
       <section className="auth-brand-panel">
-        <div className="brand-mark brand-mark-light"><span>✓</span><strong>SGT</strong></div>
+        <img className="auth-brand-logo" src={logo} alt="SGT - Sistema de Gestão de Tarefas" />
+
         <div className="auth-brand-copy">
           <span className="home-kicker light">Comece sua organização</span>
           <h1>Tenha sua rotina escolar em um só lugar.</h1>
