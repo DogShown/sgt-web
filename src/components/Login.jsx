@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { loginService } from '../services/loginServices';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/logocanuflada.jpg';
 
 export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
   const [email, setEmail] = useState('');

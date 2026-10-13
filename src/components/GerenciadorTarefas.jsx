@@ -21,8 +21,27 @@ const labelPrioridade = {
   ALTA: 'Alta'
 };
 
+const statusColunas = [
+  { id: 'NAO_INICIADO', titulo: 'Não iniciado' },
+  { id: 'EM_ANDAMENTO', titulo: 'Em andamento' },
+  { id: 'CONCLUIDA', titulo: 'Concluída' }
+];
+
+const normalizarStatus = (status) => {
+  const valor = (status || '').toUpperCase();
+
+  if (['PENDENTE', 'NAO_INICIADO', 'NAO_INICIADA'].includes(valor)) return 'NAO_INICIADO';
+  if (['EM_ANDAMENTO', 'ANDAMENTO'].includes(valor)) return 'EM_ANDAMENTO';
+  if (['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(valor)) return 'CONCLUIDA';
+
+  return 'NAO_INICIADO';
+};
+
 const labelStatus = {
-  PENDENTE: 'Pendente',
+  NAO_INICIADO: 'Não iniciado',
+  EM_ANDAMENTO: 'Em andamento',
+  CONCLUIDA: 'Concluída',
+  PENDENTE: 'Não iniciado',
   CONCLUIDA_NO_PRAZO: 'Concluída',
   CONCLUIDA_COM_ATRASO: 'Concluída com atraso'
 };
@@ -33,6 +52,7 @@ function GerenciadorTarefas() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
+  const [tarefaArrastada, setTarefaArrastada] = useState(null);
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -45,7 +65,10 @@ function GerenciadorTarefas() {
       setErro('');
       setLoading(true);
       const dados = await tarefaService.listarPorUsuario();
-      setTarefas(Array.isArray(dados) ? dados : []);
+      const tarefasNormalizadas = Array.isArray(dados)
+        ? dados.map((tarefa) => ({ ...tarefa, status: normalizarStatus(tarefa.status) }))
+        : [];
+      setTarefas(tarefasNormalizadas);
     } catch (err) {
       setErro('Erro ao carregar a lista de tarefas.');
     } finally {
@@ -65,6 +88,11 @@ function GerenciadorTarefas() {
     setDataEntrega('');
   };
 
+  const tarefasPorColuna = statusColunas.reduce((acumulador, coluna) => {
+    acumulador[coluna.id] = tarefas.filter((tarefa) => normalizarStatus(tarefa.status) === coluna.id);
+    return acumulador;
+  }, {});
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErro('');
@@ -76,7 +104,8 @@ function GerenciadorTarefas() {
       descricao,
       categoria,
       prioridade,
-      dataEntrega
+      dataEntrega,
+      status: 'NAO_INICIADO'
     };
 
     try {
@@ -113,6 +142,40 @@ function GerenciadorTarefas() {
         setErro('Erro ao excluir a tarefa.');
       }
     }
+  };
+
+  const moverTarefa = async (id, statusDestino) => {
+    if (!id) return;
+
+    const destinoNormalizado = normalizarStatus(statusDestino);
+
+    setTarefas((tarefasAtuais) =>
+      tarefasAtuais.map((tarefa) =>
+        tarefa.id === id ? { ...tarefa, status: destinoNormalizado } : tarefa
+      )
+    );
+
+    if (destinoNormalizado === 'CONCLUIDA') {
+      try {
+        await tarefaService.concluir(id);
+        setSucesso('Tarefa movida para concluída.');
+      } catch (err) {
+        setErro('Erro ao atualizar o status da tarefa.');
+      }
+    } else {
+      setSucesso('Status da tarefa atualizado.');
+    }
+
+    setTarefaArrastada(null);
+  };
+
+  const handleDragStart = (id) => {
+    setTarefaArrastada(id);
+  };
+
+  const handleDrop = async (statusDestino) => {
+    if (!tarefaArrastada) return;
+    await moverTarefa(tarefaArrastada, statusDestino);
   };
 
   return (
@@ -218,63 +281,90 @@ function GerenciadorTarefas() {
           </div>
 
           {loading ? (
-            <div className="task-list">
-              {[1, 2, 3].map((item) => (
-                <article className="task-card task-skeleton" key={item}>
-                  <div className="skeleton-line skeleton-title" />
-                  <div className="skeleton-line skeleton-short" />
-                  <div className="skeleton-line skeleton-meta" />
-                </article>
+            <div className="kanban-board kanban-skeletons">
+              {statusColunas.map((coluna) => (
+                <div className="kanban-column" key={coluna.id}>
+                  <div className="kanban-column-header skeleton-header" />
+                  <div className="task-card task-skeleton">
+                    <div className="skeleton-line skeleton-title" />
+                    <div className="skeleton-line skeleton-short" />
+                    <div className="skeleton-line skeleton-meta" />
+                  </div>
+                </div>
               ))}
             </div>
-          ) : tarefas.length === 0 ? (
-            <div className="tasks-empty">
-              <div className="tasks-empty-icon" aria-hidden="true">✓</div>
-              <h3>Nenhuma tarefa por aqui</h3>
-              <p>Crie sua primeira tarefa para começar a organizar sua rotina.</p>
-            </div>
           ) : (
-            <div className="task-list">
-              {tarefas.map((tarefa) => {
-                const concluida = ['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status);
-                const prioridadeClass = (tarefa.prioridade || 'MEDIA').toLowerCase();
-                const statusClass = concluida ? 'concluida' : 'pendente';
+            <div className="kanban-board">
+              {statusColunas.map((coluna) => (
+                <div
+                  key={coluna.id}
+                  className="kanban-column"
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={() => handleDrop(coluna.id)}
+                >
+                  <div className="kanban-column-header">
+                    <div className="kanban-column-title">
+                      <span className={`kanban-dot ${coluna.id.toLowerCase()}`} aria-hidden="true" />
+                      <h3>{coluna.titulo}</h3>
+                    </div>
+                    <span className="kanban-count">{tarefasPorColuna[coluna.id]?.length || 0}</span>
+                  </div>
 
-                return (
-                  <article className={`task-card ${statusClass}`} key={tarefa.id}>
-                    <div className="task-card-top">
-                      <div className="task-title-wrap">
-                        <span className={`task-status-dot ${statusClass}`} aria-hidden="true" />
-                        <div>
-                          <h3>{tarefa.titulo}</h3>
-                          {tarefa.descricao && <p>{tarefa.descricao}</p>}
-                        </div>
+                  <div className="kanban-column-body">
+                    {(!tarefasPorColuna[coluna.id] || tarefasPorColuna[coluna.id].length === 0) ? (
+                      <div className="kanban-empty-state">
+                        <p>Arraste uma tarefa aqui</p>
                       </div>
-                      <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
-                        ×
-                      </button>
-                    </div>
+                    ) : (
+                      tarefasPorColuna[coluna.id].map((tarefa) => {
+                        const concluida = normalizarStatus(tarefa.status) === 'CONCLUIDA';
+                        const prioridadeClass = (tarefa.prioridade || 'MEDIA').toLowerCase();
 
-                    <div className="task-meta">
-                      <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
-                      <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
-                      <span className="task-date"><span aria-hidden="true">📅</span> {formatarData(tarefa.dataEntrega)}</span>
-                    </div>
+                        return (
+                          <article
+                            className={`task-card ${concluida ? 'concluida' : ''}`}
+                            key={tarefa.id}
+                            draggable
+                            onDragStart={() => handleDragStart(tarefa.id)}
+                            onDragEnd={() => setTarefaArrastada(null)}
+                          >
+                            <div className="task-card-top">
+                              <div className="task-title-wrap">
+                                <span className={`task-status-dot ${concluida ? 'concluida' : ''}`} aria-hidden="true" />
+                                <div>
+                                  <h3>{tarefa.titulo}</h3>
+                                  {tarefa.descricao && <p>{tarefa.descricao}</p>}
+                                </div>
+                              </div>
+                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
+                                ×
+                              </button>
+                            </div>
 
-                    <div className="task-card-bottom">
-                      <span className={`task-status-label ${statusClass}`}>
-                        {labelStatus[tarefa.status] || tarefa.status || 'Pendente'}
-                      </span>
+                            <div className="task-meta">
+                              <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
+                              <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
+                              <span className="task-date"><span aria-hidden="true">📅</span> {formatarData(tarefa.dataEntrega)}</span>
+                            </div>
 
-                      {!concluida && (
-                        <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
-                          ✓ Concluir
-                        </button>
-                      )}
-                    </div>
-                  </article>
-                );
-              })}
+                            <div className="task-card-bottom">
+                              <span className={`task-status-label ${concluida ? 'concluida' : ''}`}>
+                                {labelStatus[normalizarStatus(tarefa.status)] || 'Pendente'}
+                              </span>
+
+                              {!concluida && (
+                                <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
+                                  ✓ Concluir
+                                </button>
+                              )}
+                            </div>
+                          </article>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </section>

@@ -105,7 +105,6 @@ export default function App() {
   if (!usuarioLogado) {
     return (
       <div className="screen-transition" key={screenKey}>
-        <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
         {telaPublica !== 'home' && (
           <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
         )}
@@ -138,7 +137,6 @@ export default function App() {
 
   return (
     <div className="screen-transition" key={screenKey}>
-      <a className="skip-link" href="#conteudo-principal">Pular para o conteúdo principal</a>
       <div className="app-container">
         <aside className="sidebar" aria-label="Barra lateral do SGT">
           <div>
