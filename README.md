@@ -1,16 +1,35 @@
-# React + Vite
+# Sistema de Gerenciamento de Tarefas (SGT)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend web do SGT, desenvolvido com React, Vite e Axios. O backend Java/Spring Boot e o banco SQL Server ficam em repositórios/serviços separados.
 
-Currently, two official plugins are available:
+## Tecnologias
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- React
+- Vite
+- React Router
+- Axios
+- ESLint
+- Backend: Java 21, Spring Boot e Maven
+- Banco de dados: Microsoft SQL Server hospedado no Somee
 
-## React Compiler
+## Desenvolvimento local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Instale Node.js e o JDK 21.
+2. Mantenha os repositórios `sgt-web` e `sgt-backend` em pastas irmãs.
+3. Abra `sgt-fullstack.code-workspace` no VS Code para trabalhar com frontend e backend na mesma janela.
+4. Inicie o backend na porta local `8080), com as variáveis de ambiente do banco configuradas.
+5. Na pasta do frontend, instale as dependências com `npm install` e execute `npm run dev`.
+6. O Vite encaminha `/api` e `/ws-sgt` para `http://localhost:8080` durante o desenvolvimento.
 
-## Expanding the ESLint configuration
+Os passos completos, requisitos e cuidados com credenciais estão em [DEVELOPMENT.md](./DEVELOPMENT.md).
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## API em produção
+
+O frontend lê a URL da API por meio da variável `VITE_API_URL`. Em produção, configure-a na Vercel com a URL pública do backend seguida de `/api`. Se não for definida, o frontend usa `/api`, que funciona com o proxy local do Vite, mas não aponta automaticamente para o backend no deploy da Vercel.
+
+## Repositórios
+
+- [Frontend — sgt-web](https://github.com/DogShown/sgt-web)
+- [Backend — sgt-backend](https://github.com/DogShown/sgt-backend)
+
+Não armazene senhas, tokens ou segredos em arquivos versionados.
