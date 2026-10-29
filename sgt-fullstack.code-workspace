@@ -1,0 +1,25 @@
+{
+  "folders": [
+    {
+      "name": "SGT Frontend (React + Vite)",
+      "path": "."
+    },
+    {
+      "name": "SGT Backend (Spring Boot)",
+      "path": "../sgt-backend"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.debug.settings.onBuildFailureProceed": false,
+    "editor.formatOnSave": false
+  },
+  "extensions": {
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "vmware.vscode-boot-dev-pack",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode"
+    ]
+  }
+}
