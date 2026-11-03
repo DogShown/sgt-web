@@ -4755,3 +4755,137 @@ button:disabled {
     transition-duration: .01ms !important;
   }
 }
+
+
+/* Base responsiva para navegadores móveis, tablets e desktop */
+:root {
+  color-scheme: light;
+  --theme-page: #f4f7fa;
+  --theme-surface: #ffffff;
+  --theme-text-strong: #173849;
+  --theme-muted: #71808b;
+  --theme-border: #e2e8f0;
+}
+
+html[data-theme="escuro"] {
+  color-scheme: dark;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  width: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  min-width: 320px;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
+input,
+select,
+textarea {
+  max-width: 100%;
+}
+
+img,
+svg,
+video {
+  max-width: 100%;
+}
+
+@supports (min-height: 100dvh) {
+  .home-page,
+  .auth-page,
+  .app-container,
+  .main-content {
+    min-height: 100dvh;
+  }
+}
+
+@media (max-width: 720px) {
+  .sidebar {
+    position: relative;
+    top: auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+    padding-top: max(14px, env(safe-area-inset-top));
+  }
+
+  .sidebar-menu {
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scroll-snap-type: x proximity;
+    padding-bottom: 4px;
+  }
+
+  .sidebar-menu li {
+    scroll-snap-align: start;
+  }
+
+  .sidebar-menu button.sidebar-link {
+    min-height: 44px;
+    white-space: nowrap;
+  }
+
+  .main-content {
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+  }
+
+  .auth-form-panel {
+    padding:
+      max(24px, env(safe-area-inset-top))
+      max(20px, env(safe-area-inset-right))
+      max(24px, env(safe-area-inset-bottom))
+      max(20px, env(safe-area-inset-left));
+  }
+}
+
+@media (max-width: 640px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+
+  .task-form-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .tasks-summary {
+    align-self: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
