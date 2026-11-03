@@ -51,7 +51,6 @@ function GerenciadorTarefas() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
-  const [tarefaArrastada, setTarefaArrastada] = useState(null);
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -141,40 +140,6 @@ function GerenciadorTarefas() {
         setErro('Erro ao excluir a tarefa.');
       }
     }
-  };
-
-  const moverTarefa = async (id, statusDestino) => {
-    if (!id) return;
-
-    const destinoNormalizado = normalizarStatus(statusDestino);
-
-    setTarefas((tarefasAtuais) =>
-      tarefasAtuais.map((tarefa) =>
-        tarefa.id === id ? { ...tarefa, status: destinoNormalizado } : tarefa
-      )
-    );
-
-    if (destinoNormalizado === 'CONCLUIDA') {
-      try {
-        await tarefaService.concluir(id);
-        setSucesso('Tarefa movida para concluída.');
-      } catch {
-        setErro('Erro ao atualizar o status da tarefa.');
-      }
-    } else {
-      setSucesso('Status da tarefa atualizado.');
-    }
-
-    setTarefaArrastada(null);
-  };
-
-  const handleDragStart = (id) => {
-    setTarefaArrastada(id);
-  };
-
-  const handleDrop = async (statusDestino) => {
-    if (!tarefaArrastada) return;
-    await moverTarefa(tarefaArrastada, statusDestino);
   };
 
   return (
@@ -298,8 +263,6 @@ function GerenciadorTarefas() {
                 <div
                   key={coluna.id}
                   className="kanban-column"
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => handleDrop(coluna.id)}
                 >
                   <div className="kanban-column-header">
                     <div className="kanban-column-title">
@@ -312,7 +275,7 @@ function GerenciadorTarefas() {
                   <div className="kanban-column-body">
                     {(!tarefasPorColuna[coluna.id] || tarefasPorColuna[coluna.id].length === 0) ? (
                       <div className="kanban-empty-state">
-                        <p>Arraste uma tarefa aqui</p>
+                        <p>Nenhuma tarefa nesta etapa.</p>
                       </div>
                     ) : (
                       tarefasPorColuna[coluna.id].map((tarefa) => {
@@ -323,9 +286,6 @@ function GerenciadorTarefas() {
                           <article
                             className={`task-card ${concluida ? 'concluida' : ''}`}
                             key={tarefa.id}
-                            draggable
-                            onDragStart={() => handleDragStart(tarefa.id)}
-                            onDragEnd={() => setTarefaArrastada(null)}
                           >
                             <div className="task-card-top">
                               <div className="task-title-wrap">
