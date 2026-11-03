@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --sidebar-bg: #07263f;
   --sidebar-hover: #0b3855;
