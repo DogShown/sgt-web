@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
-import logo from '../assets/logo.jpg';
 
 const formatarData = (data) => {
   if (!data) return 'Sem prazo';
@@ -60,7 +59,7 @@ export default function Dashboard() {
       const [ano, mes, dia] = tarefa.dataEntrega.split('-').map(Number);
       return new Date(ano, mes - 1, dia) < hoje;
     });
-    const taxa = tarefas.length ? Math.round((concluidas.length / tarefas.length) * 100) : 0;
+    const taxa = tarefasDoPeriodo.length ? Math.round((concluidas.length / tarefasDoPeriodo.length) * 100) : 0;
     const categorias = tarefasDoPeriodo.reduce((acc, tarefa) => {
       const categoria = tarefa.categoria || 'Outras';
       acc[categoria] = (acc[categoria] || 0) + 1;
@@ -72,7 +71,7 @@ export default function Dashboard() {
       .slice(0, 5);
 
     return { concluidas: concluidas.length, pendentes: pendentes.length, atrasadas: atrasadas.length, taxa, categorias, proximas };
-  }, [tarefas]);
+  }, [tarefas, periodo]);
 
 
   const graficoMensal = useMemo(() => {
