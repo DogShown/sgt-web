@@ -35,7 +35,7 @@ self.addEventListener('notificationclick', (event) => {
         sameOriginClient.navigate(targetUrl);
         return sameOriginClient.focus();
       }
-      return clients.openWindow(targetUrl);
+      return self.clients.openWindow(targetUrl);
     })
   );
 });
