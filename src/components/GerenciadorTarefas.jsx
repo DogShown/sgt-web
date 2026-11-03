@@ -74,6 +74,8 @@ function GerenciadorTarefas() {
   };
 
   useEffect(() => {
+    // A carga é assíncrona; os estados mudam após a resposta da API.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     carregarTarefas();
   }, []);
 
@@ -124,7 +126,7 @@ function GerenciadorTarefas() {
       await tarefaService.concluir(id);
       setSucesso('Tarefa marcada como concluída.');
       await carregarTarefas();
-    } catch (err) {
+    } catch {
       setErro('Erro ao concluir a tarefa.');
     }
   };
@@ -135,7 +137,7 @@ function GerenciadorTarefas() {
         setErro('');
         await tarefaService.deletar(id);
         await carregarTarefas();
-      } catch (err) {
+      } catch {
         setErro('Erro ao excluir a tarefa.');
       }
     }
@@ -156,7 +158,7 @@ function GerenciadorTarefas() {
       try {
         await tarefaService.concluir(id);
         setSucesso('Tarefa movida para concluída.');
-      } catch (err) {
+      } catch {
         setErro('Erro ao atualizar o status da tarefa.');
       }
     } else {
