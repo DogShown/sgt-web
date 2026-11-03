@@ -1,5 +1,5 @@
 self.addEventListener('push', (event) => {
-  let data = {};
+  let data;
 
   try {
     data = event.data ? event.data.json() : {};
@@ -29,7 +29,7 @@ self.addEventListener('notificationclick', (event) => {
   ).href;
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       const sameOriginClient = clientList.find((client) => client.url.startsWith(self.location.origin));
       if (sameOriginClient) {
         sameOriginClient.navigate(targetUrl);
