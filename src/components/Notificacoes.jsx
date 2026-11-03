@@ -3,6 +3,24 @@ import { tarefaService } from '../services/tarefaService';
 import { pushService } from '../services/pushService';
 
 const STORAGE_KEY = 'sgt_notifications_read';
+
+const obterChaveLeitura = () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+    return `${STORAGE_KEY}:${usuario.id ?? usuario.email ?? 'usuario'}`;
+  } catch {
+    return `${STORAGE_KEY}:usuario`;
+  }
+};
+
+const lerIdsLidos = (chave) => {
+  try {
+    const dados = JSON.parse(localStorage.getItem(chave) || '[]');
+    return Array.isArray(dados) ? dados : [];
+  } catch {
+    return [];
+  }
+};
 const dataLocal = (data) => {
   if (!data) return null;
   const [y, m, d] = data.split('-').map(Number);
@@ -11,14 +29,19 @@ const dataLocal = (data) => {
 
 export default function Notificacoes() {
   const [tarefas, setTarefas] = useState([]);
-  const [lidas, setLidas] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+  const [chaveLeitura] = useState(obterChaveLeitura);
+  const [lidas, setLidas] = useState(() => lerIdsLidos(chaveLeitura));
   const [carregando, setCarregando] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState('');
   const [pushAtivo, setPushAtivo] = useState(false);
   const [pushCarregando, setPushCarregando] = useState(false);
   const [pushErro, setPushErro] = useState('');
 
   useEffect(() => {
-    tarefaService.listarPorUsuario().then(dados => setTarefas(Array.isArray(dados) ? dados : [])).catch(() => setTarefas([])).finally(() => setCarregando(false));
+    tarefaService.listarPorUsuario()
+      .then((dados) => setTarefas(Array.isArray(dados) ? dados : []))
+      .catch(() => setErroCarregamento('Não foi possível carregar as notificações. Verifique sua conexão e tente novamente.'))
+      .finally(() => setCarregando(false));
   }, []);
 
   const notificacoes = useMemo(() => {
@@ -40,7 +63,7 @@ export default function Notificacoes() {
   const marcarLida = (id) => {
     const novas = [...new Set([...lidas, id])];
     setLidas(novas);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));
+    localStorage.setItem(chaveLeitura, JSON.stringify(novas));
   };
   const marcarTodas = () => {
     const novas = [...new Set([...lidas, ...notificacoes.map(n => n.id)])];
@@ -61,6 +84,9 @@ export default function Notificacoes() {
     setPushErro('');
     setPushCarregando(true);
     try {
+      if (!pushService.supported()) {
+        throw new Error('Este navegador ou dispositivo não oferece suporte a notificações push.');
+      }
       if (Notification.permission === 'default') {
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') throw new Error('A permissão para notificações não foi concedida.');
@@ -84,7 +110,7 @@ export default function Notificacoes() {
       <header className="page-header notifications-header">
         <div><p className="dashboard-eyebrow">SGT • Central de avisos</p><h1>Notificações</h1><p>{naoLidas ? naoLidas + ' não lida(s)' : 'Tudo em dia por aqui.'}</p></div>
         <div className="notification-actions">
-          {!pushAtivo && <button className="btn-outline" onClick={ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Ativando...' : 'Ativar notificações'}</button>}
+          {pushService.supported() && !pushAtivo && <button type="button" className="btn-outline" onClick={ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Ativando...' : 'Ativar notificações'}</button>}
           {naoLidas > 0 && <button className="btn-ghost" onClick={marcarTodas}>Marcar todas como lidas</button>}
         </div>
       </header>
@@ -102,7 +128,7 @@ export default function Notificacoes() {
           })}
       </section>
       {pushErro && <p className="push-note push-error" role="alert">{pushErro}</p>}
-      <p className="push-note"><strong>Notificações do dispositivo:</strong> ao ativar, o SGT registra este navegador para receber Web Push mesmo quando a página não estiver aberta. O servidor precisa estar com as chaves VAPID configuradas.</p>
+      <p className="push-note"><strong>Notificações do dispositivo:</strong> em navegadores compatíveis, você pode ativar o Web Push para receber avisos mesmo quando a página não estiver aberta. O servidor precisa estar com as chaves VAPID configuradas.</p>
     </div>
   );
 }
