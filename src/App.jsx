@@ -7,6 +7,7 @@ import GerenciadorTarefas from './components/GerenciadorTarefas';
 import Notificacoes from './components/Notificacoes';
 import Perfil from './components/Perfil';
 import api from './services/api';
+import logo from './assets/logo.jpg';
 
 function ThemeToggle({ tema, onToggle, className = '' }) {
   const escuro = tema === 'escuro';
@@ -139,31 +140,56 @@ export default function App() {
     <div className="screen-transition" key={screenKey}>
       <div className="app-container">
         <aside className="sidebar" aria-label="Barra lateral do SGT">
-          <div>
-            <div className="sidebar-header"><h2>SGT</h2></div>
-            <nav aria-label="Navegação principal"><ul className="sidebar-menu">
-              <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
-              </li>
-              <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
-              </li>
-              <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>Notificações</button>
-              </li>
-              <li className={abaAtiva === 'perfil' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>Meu perfil</button>
-              </li>
-            </ul></nav>
+          <div className="sidebar-main">
+            <div className="sidebar-brand">
+              <img src={logo} alt="" className="sidebar-brand-logo" />
+              <span className="sidebar-brand-copy">
+                <strong>SGT</strong>
+                <small>Organize sua rotina</small>
+              </span>
+            </div>
+
+            <div className="sidebar-nav-label">MENU PRINCIPAL</div>
+            <nav aria-label="Navegação principal">
+              <ul className="sidebar-menu">
+                <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>
+                    <span className="sidebar-link-icon" aria-hidden="true">▦</span><span>Dashboard</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>
+                    <span className="sidebar-link-icon" aria-hidden="true">✓</span><span>Tarefas</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>
+                    <span className="sidebar-link-icon" aria-hidden="true">◉</span><span>Notificações</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'perfil' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>
+                    <span className="sidebar-link-icon" aria-hidden="true">◎</span><span>Meu perfil</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
 
-          <div className="sidebar-user">
+          <div className="sidebar-footer">
             <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('perfil')}>
               <span className="sidebar-avatar">{(usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
-              <span><small>Usuário</small><strong>{usuarioLogado.nome || 'Usuário'}</strong><em>{usuarioLogado.turma || 'Turma não definida'}</em></span>
+              <span className="sidebar-user-copy">
+                <small>Usuário</small>
+                <strong>{usuarioLogado.nome || 'Usuário'}</strong>
+                <em>{usuarioLogado.turma || 'Turma não definida'}</em>
+              </span>
+              <span className="sidebar-profile-chevron" aria-hidden="true">↗</span>
             </button>
-            <ThemeToggle tema={tema} onToggle={alternarTema} />
-            <button onClick={handleLogout} className="logout-button">Sair</button>
+            <div className="sidebar-footer-actions">
+              <ThemeToggle tema={tema} onToggle={alternarTema} />
+              <button type="button" onClick={handleLogout} className="logout-button"><span aria-hidden="true">↪</span> Sair</button>
+            </div>
           </div>
         </aside>
 
