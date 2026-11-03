@@ -15,7 +15,7 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
     setEnviando(true);
 
     try {
-      const usuario = await loginService.login(email, senha);
+      const usuario = await loginService.login(email, senha, lembrarDeMim);
       localStorage.removeItem('sgt_token');
       sessionStorage.removeItem('sgt_token');
       const armazenamento = lembrarDeMim ? localStorage : sessionStorage;
