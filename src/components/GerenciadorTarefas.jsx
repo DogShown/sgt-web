@@ -51,6 +51,7 @@ function GerenciadorTarefas() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
+  const [tarefaEmOperacao, setTarefaEmOperacao] = useState(null);
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -95,11 +96,15 @@ function GerenciadorTarefas() {
     e.preventDefault();
     setErro('');
     setSucesso('');
+    if (!titulo.trim()) {
+      setErro('Informe um título válido para a tarefa.');
+      return;
+    }
     setCriando(true);
 
     const novaTarefaDTO = {
-      titulo,
-      descricao,
+      titulo: titulo.trim(),
+      descricao: descricao.trim(),
       categoria,
       prioridade,
       dataEntrega,
@@ -119,7 +124,9 @@ function GerenciadorTarefas() {
   };
 
   const handleAlterarStatus = async (id, status) => {
+    if (tarefaEmOperacao === id) return;
     try {
+      setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
       await tarefaService.alterarStatus(id, status);
@@ -127,30 +134,40 @@ function GerenciadorTarefas() {
       await carregarTarefas();
     } catch (error) {
       setErro(error.response?.data?.message || 'Não foi possível atualizar o status da tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
     }
   };
 
   const handleConcluir = async (id) => {
+    if (tarefaEmOperacao === id) return;
     try {
+      setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
       await tarefaService.concluir(id);
       setSucesso('Tarefa marcada como concluída.');
       await carregarTarefas();
-    } catch {
-      setErro('Erro ao concluir a tarefa.');
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Erro ao concluir a tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
     }
   };
 
   const handleDeletar = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
-      try {
-        setErro('');
-        await tarefaService.deletar(id);
-        await carregarTarefas();
-      } catch {
-        setErro('Erro ao excluir a tarefa.');
-      }
+    if (tarefaEmOperacao === id || !window.confirm('Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.')) return;
+    try {
+      setTarefaEmOperacao(id);
+      setErro('');
+      setSucesso('');
+      await tarefaService.deletar(id);
+      setSucesso('Tarefa excluída.');
+      await carregarTarefas();
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Erro ao excluir a tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
     }
   };
 
@@ -192,6 +209,7 @@ function GerenciadorTarefas() {
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex.: Trabalho de Matemática"
+                maxLength={100}
                 required
               />
             </label>
@@ -307,7 +325,7 @@ function GerenciadorTarefas() {
                                   {tarefa.descricao && <p>{tarefa.descricao}</p>}
                                 </div>
                               </div>
-                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
+                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
                                 ×
                               </button>
                             </div>
@@ -326,15 +344,15 @@ function GerenciadorTarefas() {
                               {!concluida && (
                                 <div className="task-actions">
                                   {normalizarStatus(tarefa.status) === 'NAO_INICIADO' ? (
-                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')}>
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')} disabled={tarefaEmOperacao === tarefa.id}>
                                       Iniciar
                                     </button>
                                   ) : (
-                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')}>
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')} disabled={tarefaEmOperacao === tarefa.id}>
                                       Não iniciado
                                     </button>
                                   )}
-                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
+                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
                                     ✓ Concluir
                                   </button>
                                 </div>
