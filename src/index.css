@@ -4610,3 +4610,148 @@ html[data-theme="escuro"] .profile-feedback.error {
     transition: none;
   }
 }
+
+
+/* Ajustes finais de consistência, acessibilidade e telas menores */
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid rgba(3, 127, 140, .55);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+.main-content {
+  min-width: 0;
+  width: 100%;
+}
+
+.sidebar-user-copy,
+.sidebar-profile-button,
+.sidebar-link {
+  min-width: 0;
+}
+
+.sidebar-user-copy strong,
+.sidebar-user-copy em,
+.sidebar-user-copy small,
+.sidebar-user-copy {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dashboard-page,
+.tasks-page,
+.notifications-page,
+.profile-page {
+  width: 100%;
+}
+
+.dashboard-header,
+.tasks-header,
+.notifications-header,
+.profile-header {
+  min-width: 0;
+}
+
+.dashboard-header > div:first-child,
+.tasks-header > div:first-child,
+.notifications-header > div:first-child,
+.profile-header > div:first-child {
+  min-width: 0;
+}
+
+.dashboard-header h1,
+.tasks-header h1,
+.notifications-header h1,
+.profile-header h1 {
+  overflow-wrap: anywhere;
+}
+
+.dashboard-card,
+.stat-card,
+.task-form-card,
+.kanban-column,
+.profile-summary-card,
+.profile-form-card,
+.notifications-list {
+  min-width: 0;
+}
+
+.notification-copy {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.task-title-wrap {
+  min-width: 0;
+}
+
+.task-title-wrap h3,
+.task-title-wrap p {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 1100px) {
+  .dashboard-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dashboard-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboard-performance,
+  .dashboard-card {
+    min-width: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .dashboard-stats {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .dashboard-header {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .period-toggle {
+    width: 100%;
+  }
+
+  .period-toggle button {
+    flex: 1;
+  }
+
+  .dashboard-card {
+    padding: 18px;
+  }
+
+  .performance-chart {
+    gap: 8px;
+  }
+
+  .performance-month {
+    font-size: .68rem;
+  }
+
+  .profile-form-footer > span {
+    font-size: .75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}
