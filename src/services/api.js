@@ -9,7 +9,7 @@ const api = axios.create({
 
 // Injeta o token do usuário logado em todas as requisições ativas
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('sgt_token');
+  const token = localStorage.getItem('sgt_token') || sessionStorage.getItem('sgt_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
