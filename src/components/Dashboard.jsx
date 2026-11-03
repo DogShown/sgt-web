@@ -8,6 +8,14 @@ const formatarData = (data) => {
   return new Date(Number(ano), Number(mes) - 1, Number(dia)).toLocaleDateString('pt-BR');
 };
 
+const labelCategoria = {
+  TRABALHO: 'Trabalho',
+  ESTUDO: 'Estudo',
+  PESSOAL: 'Pessoal',
+};
+
+const statusConcluidos = ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'];
+
 const inicioDoDia = () => {
   const hoje = new Date();
   hoje.setHours(0, 0, 0, 0);
@@ -60,8 +68,8 @@ export default function Dashboard() {
       const dataEntrega = new Date(ano, mes - 1, dia);
       return dataEntrega >= inicioPeriodo && dataEntrega <= fimPeriodo;
     });
-    const concluidas = tarefasDoPeriodo.filter((tarefa) => ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(tarefa.status));
-    const pendentes = tarefasDoPeriodo.filter((tarefa) => tarefa.status === 'PENDENTE');
+    const concluidas = tarefasDoPeriodo.filter((tarefa) => statusConcluidos.includes(tarefa.status));
+    const pendentes = tarefasDoPeriodo.filter((tarefa) => !statusConcluidos.includes(tarefa.status));
     const atrasadas = pendentes.filter((tarefa) => {
       if (!tarefa.dataEntrega) return false;
       const [ano, mes, dia] = tarefa.dataEntrega.split('-').map(Number);
@@ -69,12 +77,12 @@ export default function Dashboard() {
     });
     const taxa = tarefasDoPeriodo.length ? Math.round((concluidas.length / tarefasDoPeriodo.length) * 100) : 0;
     const categorias = tarefasDoPeriodo.reduce((acc, tarefa) => {
-      const categoria = tarefa.categoria || 'Outras';
+      const categoria = labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras';
       acc[categoria] = (acc[categoria] || 0) + 1;
       return acc;
     }, {});
     const proximas = tarefasDoPeriodo
-      .filter((tarefa) => tarefa.status === 'PENDENTE' && tarefa.dataEntrega)
+      .filter((tarefa) => !statusConcluidos.includes(tarefa.status) && tarefa.dataEntrega)
       .sort((a, b) => a.dataEntrega.localeCompare(b.dataEntrega))
       .slice(0, 5);
 
@@ -121,7 +129,7 @@ export default function Dashboard() {
         </div>
       </header>
 
-      {erro && <div className="dashboard-alert">{erro}</div>}
+      {erro && <div className="dashboard-alert" role="alert">{erro}</div>}
 
       <section className="dashboard-stats">
         <article className="stat-card"><span className="stat-card-icon success" aria-hidden="true">✓</span><span className="stat-label">Concluídas</span><strong>{carregando ? '—' : metricas.concluidas}</strong><span className="stat-helper">tarefas finalizadas</span></article>
