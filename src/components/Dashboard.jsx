@@ -14,8 +14,16 @@ const inicioDoDia = () => {
   return hoje;
 };
 
+const obterUsuarioSalvo = () => {
+  try {
+    return JSON.parse(localStorage.getItem('sgt_user') || '{}');
+  } catch {
+    return {};
+  }
+};
+
 export default function Dashboard() {
-  const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+  const usuario = obterUsuarioSalvo();
   const [tarefas, setTarefas] = useState([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState('');
