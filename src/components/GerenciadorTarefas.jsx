@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
 const formatarData = (data) => {
@@ -61,14 +61,12 @@ function GerenciadorTarefas() {
 
   const carregarTarefas = async () => {
     try {
-      setErro('');
-      setLoading(true);
       const dados = await tarefaService.listarPorUsuario();
       const tarefasNormalizadas = Array.isArray(dados)
         ? dados.map((tarefa) => ({ ...tarefa, status: normalizarStatus(tarefa.status) }))
         : [];
       setTarefas(tarefasNormalizadas);
-    } catch (err) {
+    } catch {
       setErro('Erro ao carregar a lista de tarefas.');
     } finally {
       setLoading(false);
