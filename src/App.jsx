@@ -29,7 +29,11 @@ function ThemeToggle({ tema, onToggle, className = '' }) {
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [telaPublica, setTelaPublica] = useState('home');
-  const [abaAtiva, setAbaAtiva] = useState('dashboard');
+  const [abaAtiva, setAbaAtiva] = useState(() => (
+    new URLSearchParams(window.location.search).get('tab') === 'notificacoes'
+      ? 'notificacoes'
+      : 'dashboard'
+  ));
   const [verificandoSessao, setVerificandoSessao] = useState(true);
   const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
 
