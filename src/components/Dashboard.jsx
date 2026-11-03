@@ -33,6 +33,8 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
+    // A carga é assíncrona; os estados mudam após a resposta da API.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     carregarTarefas();
   }, []);
 
