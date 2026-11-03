@@ -36,6 +36,20 @@ export default function App() {
   ));
   const [verificandoSessao, setVerificandoSessao] = useState(true);
   const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
+  const [mensagemSessao, setMensagemSessao] = useState('');
+
+  useEffect(() => {
+    const encerrarSessaoExpirada = () => {
+      localStorage.removeItem('sgt_token');
+      sessionStorage.removeItem('sgt_token');
+      localStorage.removeItem('sgt_user');
+      setUsuarioLogado(null);
+      setTelaPublica('login');
+      setMensagemSessao('Sua sessão expirou ou não é mais válida. Entre novamente para continuar.');
+    };
+    window.addEventListener('sgt:session-expired', encerrarSessaoExpirada);
+    return () => window.removeEventListener('sgt:session-expired', encerrarSessaoExpirada);
+  }, []);
 
   useEffect(() => {
     // A aba é lida da URL uma única vez; remove o parâmetro para não reaplicá-lo
@@ -86,6 +100,7 @@ export default function App() {
   const handleLoginSucesso = () => {
     const user = localStorage.getItem('sgt_user');
     if (user) setUsuarioLogado(JSON.parse(user));
+    setMensagemSessao('');
   };
 
   const handleUsuarioAtualizado = (usuarioAtualizado) => {
@@ -130,7 +145,8 @@ export default function App() {
           <Login
             onLoginSucesso={handleLoginSucesso}
             onCadastro={() => setTelaPublica('cadastro')}
-            onVoltarHome={() => setTelaPublica('home')}
+            onVoltarHome={() => { setMensagemSessao(''); setTelaPublica('home'); }}
+            mensagemInicial={mensagemSessao}
           />
         )}
 
