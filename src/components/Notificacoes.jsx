@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 import { pushService } from '../services/pushService';
 
