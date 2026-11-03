@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 
 const formatarData = (data) => {
@@ -23,11 +23,9 @@ export default function Dashboard() {
 
   const carregarTarefas = async () => {
     try {
-      setErro('');
-      setCarregando(true);
       const dados = await tarefaService.listarPorUsuario();
       setTarefas(Array.isArray(dados) ? dados : []);
-    } catch (error) {
+    } catch {
       setErro('Não foi possível carregar os dados do dashboard.');
     } finally {
       setCarregando(false);
