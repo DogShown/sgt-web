@@ -38,6 +38,16 @@ export default function App() {
   const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
 
   useEffect(() => {
+    // A aba é lida da URL uma única vez; remove o parâmetro para não reaplicá-lo
+    // em recargas futuras depois que a pessoa navegar para outra seção.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('tab')) {
+      url.searchParams.delete('tab');
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+  }, []);
+
+  useEffect(() => {
     document.documentElement.dataset.theme = tema;
     localStorage.setItem('sgt_theme', tema);
   }, [tema]);
