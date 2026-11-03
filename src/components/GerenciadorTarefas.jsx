@@ -118,6 +118,18 @@ function GerenciadorTarefas() {
     }
   };
 
+  const handleAlterarStatus = async (id, status) => {
+    try {
+      setErro('');
+      setSucesso('');
+      await tarefaService.alterarStatus(id, status);
+      setSucesso(status === 'EM_ANDAMENTO' ? 'Tarefa movida para Em andamento.' : 'Tarefa movida para Não iniciado.');
+      await carregarTarefas();
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Não foi possível atualizar o status da tarefa.');
+    }
+  };
+
   const handleConcluir = async (id) => {
     try {
       setErro('');
@@ -312,9 +324,20 @@ function GerenciadorTarefas() {
                               </span>
 
                               {!concluida && (
-                                <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
-                                  ✓ Concluir
-                                </button>
+                                <div className="task-actions">
+                                  {normalizarStatus(tarefa.status) === 'NAO_INICIADO' ? (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')}>
+                                      Iniciar
+                                    </button>
+                                  ) : (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')}>
+                                      Não iniciado
+                                    </button>
+                                  )}
+                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
+                                    ✓ Concluir
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </article>
