@@ -61,7 +61,6 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
           <form onSubmit={handleSubmit} aria-busy={enviando}>
             <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required /></label>
             <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="current-password" required /></label>
-            <div className="form-options"><label><input type="checkbox" /> <span>Lembrar de mim</span></label><button type="button" className="forgot-link" disabled>Esqueci minha senha</button></div>
             <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
           </form>
 
