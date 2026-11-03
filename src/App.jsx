@@ -58,7 +58,7 @@ export default function App() {
 
   useEffect(() => {
     const verificarSessao = async () => {
-      const token = localStorage.getItem('sgt_token');
+      const token = localStorage.getItem('sgt_token') || sessionStorage.getItem('sgt_token');
       if (!token) {
         setVerificandoSessao(false);
         return;
@@ -73,6 +73,7 @@ export default function App() {
         setUsuarioLogado(usuario);
       } catch {
         localStorage.removeItem('sgt_token');
+        sessionStorage.removeItem('sgt_token');
         localStorage.removeItem('sgt_user');
       } finally {
         setVerificandoSessao(false);
@@ -94,6 +95,7 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('sgt_token');
+    sessionStorage.removeItem('sgt_token');
     localStorage.removeItem('sgt_user');
     setUsuarioLogado(null);
     setAbaAtiva('dashboard');
