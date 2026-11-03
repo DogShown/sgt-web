@@ -4884,3 +4884,68 @@ video {
     scroll-behavior: auto;
   }
 }
+
+
+/* Ações de formulário e tarefas: alvos confortáveis para toque e teclado */
+.login-remember {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  min-height: 44px;
+  margin: 0 0 1rem;
+  color: var(--text-secondary, #64748b);
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.login-remember input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary, #0b7890);
+}
+
+.task-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.task-status-action,
+.task-complete,
+.task-delete,
+.notification-actions button {
+  min-height: 44px;
+}
+
+.task-status-action {
+  border: 1px solid var(--border-color, #d8e2e9);
+  border-radius: 10px;
+  padding: 0.55rem 0.85rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.task-status-action:hover {
+  border-color: var(--primary, #0b7890);
+  color: var(--primary, #0b7890);
+}
+
+:where(button, a, input, select, textarea):focus-visible {
+  outline: 3px solid var(--focus-ring, #36a9c5);
+  outline-offset: 3px;
+}
+
+@media (max-width: 480px) {
+  .task-actions {
+    justify-content: stretch;
+  }
+
+  .task-actions > button {
+    flex: 1 1 auto;
+  }
+}
