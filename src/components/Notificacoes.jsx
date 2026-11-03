@@ -50,7 +50,7 @@ export default function Notificacoes() {
     return tarefas.flatMap(t => {
       if (!t.dataEntrega) return [];
       const prazo = dataLocal(t.dataEntrega);
-      const concluida = ['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status);
+      const concluida = ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status);
       if (concluida) return [{ id: 'done-' + t.id, tipo: 'success', titulo: 'Tarefa concluída', texto: t.titulo, horario: 'Agora' }];
       const diff = Math.ceil((prazo - hoje) / 86400000);
       if (diff < 0) return [{ id: 'late-' + t.id, tipo: 'danger', titulo: 'Tarefa atrasada', texto: t.titulo, horario: Math.abs(diff) + ' dia(s) em atraso' }];
@@ -68,7 +68,7 @@ export default function Notificacoes() {
   const marcarTodas = () => {
     const novas = [...new Set([...lidas, ...notificacoes.map(n => n.id)])];
     setLidas(novas);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));
+    localStorage.setItem(chaveLeitura, JSON.stringify(novas));
   };
   useEffect(() => {
     const verificarPush = async () => {
@@ -116,6 +116,7 @@ export default function Notificacoes() {
       </header>
       <section className="notifications-list">
         {carregando ? <div className="notifications-empty">Carregando notificações...</div> :
+          erroCarregamento ? <div className="notifications-empty" role="alert"><h2>Não foi possível carregar</h2><p>{erroCarregamento}</p><button type="button" className="btn-outline" onClick={() => window.location.reload()}>Tentar novamente</button></div> :
           notificacoes.length === 0 ? <div className="notifications-empty"><span>✓</span><h2>Nenhuma notificação</h2><p>Quando houver uma tarefa próxima, atrasada ou concluída, ela aparecerá aqui.</p></div> :
           notificacoes.map(n => {
             const lida = lidas.includes(n.id);
