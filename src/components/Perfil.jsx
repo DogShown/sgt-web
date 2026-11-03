@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { perfilService } from '../services/perfilService';
 
 export default function Perfil({ usuario, onUsuarioAtualizado }) {
@@ -7,11 +7,6 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
-
-  useEffect(() => {
-    setNome(usuario?.nome || '');
-    setTurma(usuario?.turma || '');
-  }, [usuario]);
 
   const salvar = async (event) => {
     event.preventDefault();
