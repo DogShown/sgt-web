@@ -4,13 +4,14 @@ import LoadingFeedback from './LoadingFeedback';
 
 const pad = n => String(n).padStart(2, '0');
 const hojeISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
-const CONFIG_KEY = 'sgt_attendance_config_v1';
+const obterConfigKey = () => { try { const usuario=JSON.parse(localStorage.getItem('sgt_user')||'{}'); return 'sgt_attendance_config_v1:'+(usuario.id??'usuario'); } catch { return 'sgt_attendance_config_v1:usuario'; } };
 const configPadrao = { limite:25, totalPrevisto:200, unidade:'dias', disciplinasAtivas:false, disciplinas:[] };
-const lerConfig = () => { try { return {...configPadrao,...JSON.parse(localStorage.getItem(CONFIG_KEY)||'{}')}; } catch { return configPadrao; } };
+const lerConfig = chave => { try { return {...configPadrao,...JSON.parse(localStorage.getItem(chave)||'{}')}; } catch { return configPadrao; } };
 
 export default function Frequencia() {
   const [registros,setRegistros] = useState([]);
-  const [config,setConfig] = useState(lerConfig);
+  const [configKey] = useState(obterConfigKey);
+  const [config,setConfig] = useState(() => lerConfig(configKey));
   const [loading,setLoading] = useState(true);
   const [erro,setErro] = useState('');
   const [data,setData] = useState(hojeISO());
@@ -51,7 +52,7 @@ export default function Frequencia() {
   const adicionarMateria = () => {
     const nome=novaMateria.trim();if(!nome)return;
     const nova={...config,disciplinas:[...new Set([...(config.disciplinas||[]),nome])]};
-    setConfig(nova);localStorage.setItem(CONFIG_KEY,JSON.stringify(nova));setNovaMateria('');
+    setConfig(nova);localStorage.setItem(configKey,JSON.stringify(nova));setNovaMateria('');
   };
   const excluir = async id => {
     try {await frequenciaService.excluir(id);setRegistros(atual=>atual.filter(r=>r.id!==id));setAviso('Registro removido da sua conta.');}
