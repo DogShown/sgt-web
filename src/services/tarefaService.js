@@ -13,6 +13,11 @@ export const tarefaService = {
     return response.data;
   },
 
+  atualizar: async (id, dadosTarefa) => {
+    const response = await api.put(`/tarefas/${id}`, dadosTarefa);
+    return response.data;
+  },
+
   alterarStatus: async (id, status) => {
     const response = await api.put(`/tarefas/${id}/status`, null, { params: { status } });
     return response.data;

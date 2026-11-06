@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import { perfilService } from '../services/perfilService';
+import { contaService } from '../services/contaService';
 
 const MAX_IMAGE_SIZE = 2 * 1024 * 1024;
 
@@ -37,6 +38,9 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const [novoEmail, setNovoEmail] = useState('');
+  const [senhaExclusao, setSenhaExclusao] = useState('');
+  const [processandoConta, setProcessandoConta] = useState(false);
 
   const iniciais = (nome || 'Usuário').split(' ').filter(Boolean).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
 
@@ -100,6 +104,22 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
     }
   };
 
+  const solicitarEmail = async (event) => {
+    event.preventDefault(); setErro(''); setMensagem(''); setProcessandoConta(true);
+    try { await contaService.solicitarAlteracaoEmail(novoEmail.trim().toLowerCase()); setMensagem('Enviamos um link de confirmação para o novo endereço. Seu e-mail atual continua válido até a confirmação.'); setNovoEmail(''); }
+    catch (error) { setErro(error.response?.data?.message || 'Não foi possível solicitar a alteração do e-mail.'); }
+    finally { setProcessandoConta(false); }
+  };
+
+  const excluirConta = async (event) => {
+    event.preventDefault();
+    if (!window.confirm('Excluir sua conta e os dados associados? Esta ação não pode ser desfeita.')) return;
+    setErro(''); setProcessandoConta(true);
+    try { await contaService.excluirConta(senhaExclusao); onSair?.(); }
+    catch (error) { setErro(error.response?.data?.message || 'Não foi possível excluir a conta.'); }
+    finally { setProcessandoConta(false); }
+  };
+
   const removerFoto = () => {
     setAvatarUrl('');
     setMensagem('A foto será removida da sua conta ao salvar as alterações.');
@@ -136,6 +156,17 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
           <div className="profile-content-heading"><div><p className="profile-section-kicker">SEU ESPAÇO</p><h2>Informações da conta</h2><p>Esses dados ajudam a identificar seu perfil dentro do SGT.</p></div></div>
           {mensagem && <div className="profile-feedback success" role="status">{mensagem}</div>}
           {erro && <div className="profile-feedback error" role="alert">{erro}</div>}
+          <section className="profile-account-security">
+            <h3>Segurança da conta</h3>
+            <form onSubmit={solicitarEmail} className="profile-form-grid">
+              <label className="profile-field"><span>Solicitar alteração de e-mail</span><input type="email" value={novoEmail} onChange={e=>setNovoEmail(e.target.value)} placeholder="novo@email.com" required /></label>
+              <button type="submit" className="btn-outline" disabled={processandoConta}>Enviar confirmação</button>
+            </form>
+            <form onSubmit={excluirConta} className="profile-form-grid">
+              <label className="profile-field"><span>Senha atual para excluir a conta</span><input type="password" value={senhaExclusao} onChange={e=>setSenhaExclusao(e.target.value)} autoComplete="current-password" required /></label>
+              <button type="submit" className="btn-outline" disabled={processandoConta}>Excluir minha conta</button>
+            </form>
+          </section>
 
           <form className="profile-form profile-form-grid" onSubmit={salvar}>
             <label className="profile-field"><span>Nome completo</span><input type="text" value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} placeholder="Digite seu nome completo" autoComplete="name" /></label>

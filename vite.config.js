@@ -3,6 +3,13 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
+
+  // Compatibilidade com dependências que esperam a variável global do Node.js,
+  // como o sockjs-client, no ambiente do navegador.
+  define: {
+    global: 'globalThis',
+  },
+
   server: {
     // Permite abrir o frontend por outro computador da mesma rede local.
     host: '0.0.0.0',
