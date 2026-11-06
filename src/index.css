@@ -5803,3 +5803,17 @@ input,select,textarea { accent-color: var(--action-primary); }
 @media (prefers-reduced-motion: reduce) {
   *,*::before,*::after { scroll-behavior: auto!important; animation-duration: .01ms!important; animation-iteration-count: 1!important; transition-duration: .01ms!important; }
 }
+
+
+/* Frequencia: afastamento consistente da sidebar e respiro lateral. */
+.attendance-page {
+  width: min(100%, 1120px);
+  margin: 0 auto;
+  padding: 40px clamp(36px, 5vw, 68px) 56px;
+}
+
+@media (max-width: 720px) {
+  .attendance-page {
+    padding: 28px 20px 40px;
+  }
+}
