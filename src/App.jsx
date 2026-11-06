@@ -91,10 +91,16 @@ export default function App() {
       try {
         const response = await api.get('/auth/me');
         const usuario = response.data;
-        localStorage.setItem('sgt_user', JSON.stringify({
-          id: usuario.id, nome: usuario.nome, email: usuario.email, turma: usuario.turma, avatarUrl: (() => { try { return JSON.parse(localStorage.getItem('sgt_user') || '{}').avatarUrl || ''; } catch { return ''; } })()
-        }));
-        setUsuarioLogado(usuario);
+        const usuarioSalvo = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+        const usuarioCompleto = {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          turma: usuario.turma,
+          avatarUrl: usuarioSalvo.avatarUrl || ''
+        };
+        localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
+        setUsuarioLogado(usuarioCompleto);
       } catch {
         localStorage.removeItem('sgt_token');
         sessionStorage.removeItem('sgt_token');
