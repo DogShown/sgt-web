@@ -205,6 +205,7 @@ function AppContent() {
   }
 
   return <Routes>
+    <Route path="/app/*" element={<Navigate to="/login" replace />} />
     <Route path="/" element={<Home onLogin={() => navigate('/login')} onCadastro={() => navigate('/cadastro')} themeToggle={<ThemeToggle className="landing-theme-toggle" tema={tema} onToggle={alternarTema} />} />} />
     <Route path="/login" element={<div className="screen-transition"><ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} /><Login onLoginSucesso={handleLoginSucesso} onCadastro={() => navigate('/cadastro')} onVoltarHome={() => { setMensagemSessao(''); navigate('/'); }} mensagemInicial={mensagemSessao} /></div>} />
     <Route path="/cadastro" element={<div className="screen-transition"><ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} /><Cadastro onVoltarLogin={() => navigate('/login')} onCadastroSucesso={() => navigate('/login')} /></div>} />
