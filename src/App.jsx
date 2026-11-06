@@ -6,6 +6,8 @@ import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
 import Notificacoes from './components/Notificacoes';
 import Perfil from './components/Perfil';
+import Frequencia from './components/Frequencia';
+import UsuarioResumo from './components/UsuarioResumo';
 import api from './services/api';
 import logo from './assets/logo.jpg';
 
@@ -15,6 +17,7 @@ function NavIcon({ name }) {
     tarefas: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4M16 2v4M8 11h8M8 15h5" /></>,
     notificacoes: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>,
     perfil: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    frequencia: <><path d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7" /></>,
   };
   return <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
 }
@@ -210,6 +213,11 @@ export default function App() {
                     <span className="sidebar-link-icon"><NavIcon name="tarefas" /></span><span>Tarefas</span>
                   </button>
                 </li>
+                <li className={abaAtiva === 'frequencia' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'frequencia' ? 'page' : undefined} onClick={() => setAbaAtiva('frequencia')}>
+                    <span className="sidebar-link-icon"><NavIcon name="frequencia" /></span><span>Frequência</span>
+                  </button>
+                </li>
                 <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
                   <button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>
                     <span className="sidebar-link-icon"><NavIcon name="notificacoes" /></span><span>Notificações</span>
@@ -225,10 +233,10 @@ export default function App() {
           </div>
 
           <div className="sidebar-footer">
-            <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('perfil')}>
+            <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('usuario')}>
               <span className="sidebar-avatar">{usuarioLogado.avatarUrl ? <img src={usuarioLogado.avatarUrl} alt="" /> : (usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
               <span className="sidebar-user-copy">
-                <small>Usuário</small>
+                <small>Minha conta</small>
                 <strong>{usuarioLogado.nome || 'Usuário'}</strong>
                 <em>{usuarioLogado.turma || 'Turma não definida'}</em>
               </span>
@@ -236,7 +244,7 @@ export default function App() {
             </button>
             <div className="sidebar-footer-actions">
               <ThemeToggle tema={tema} onToggle={alternarTema} />
-              <button type="button" onClick={handleLogout} className="logout-button"><span aria-hidden="true">↪</span> Sair</button>
+
             </div>
           </div>
         </aside>
@@ -248,7 +256,11 @@ export default function App() {
               ? <GerenciadorTarefas />
               : abaAtiva === 'notificacoes'
                 ? <Notificacoes />
-                : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} />}
+                : abaAtiva === 'frequencia'
+                  ? <Frequencia />
+                  : abaAtiva === 'usuario'
+                    ? <UsuarioResumo usuario={usuarioLogado} onPerfil={() => setAbaAtiva('perfil')} onSair={handleLogout} />
+                    : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} onSair={handleLogout} />}
         </main>
       </div>
     </div>
