@@ -286,9 +286,47 @@ function GerenciadorTarefas() {
           {loading ? (
             <LoadingFeedback variant="tasks" label="Carregando suas tarefas" />
           ) : (
-                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
-                                    ✓ Concluir
-                                  </button>
+            <div className="kanban-board">
+              {statusColunas.map((coluna) => (
+                <div key={coluna.id} className="kanban-column">
+                  <div className="kanban-column-header">
+                    <div className="kanban-column-title">
+                      <span className={`kanban-dot ${coluna.id.toLowerCase()}`} aria-hidden="true" />
+                      <h3>{coluna.titulo}</h3>
+                    </div>
+                    <span className="kanban-count">{tarefasPorColuna[coluna.id]?.length || 0}</span>
+                  </div>
+                  <div className="kanban-column-body">
+                    {(!tarefasPorColuna[coluna.id] || tarefasPorColuna[coluna.id].length === 0) ? (
+                      <div className="kanban-empty-state"><p>Nenhuma tarefa nesta etapa.</p></div>
+                    ) : (
+                      tarefasPorColuna[coluna.id].map((tarefa) => {
+                        const concluida = normalizarStatus(tarefa.status) === 'CONCLUIDA';
+                        const prioridadeClass = (tarefa.prioridade || 'MEDIA').toLowerCase();
+                        return (
+                          <article className={`task-card ${concluida ? 'concluida' : ''}`} key={tarefa.id}>
+                            <div className="task-card-top">
+                              <div className="task-title-wrap">
+                                <span className={`task-status-dot ${concluida ? 'concluida' : ''}`} aria-hidden="true" />
+                                <div><h3>{tarefa.titulo}</h3>{tarefa.descricao && <p>{tarefa.descricao}</p>}</div>
+                              </div>
+                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>×</button>
+                            </div>
+                            <div className="task-meta">
+                              <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
+                              <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
+                              <span className="task-date"><span aria-hidden="true">📅</span> {formatarData(tarefa.dataEntrega)}</span>
+                            </div>
+                            <div className="task-card-bottom">
+                              <span className={`task-status-label ${concluida ? 'concluida' : ''}`}>{labelStatus[normalizarStatus(tarefa.status)] || 'Pendente'}</span>
+                              {!concluida && (
+                                <div className="task-actions">
+                                  {normalizarStatus(tarefa.status) === 'NAO_INICIADO' ? (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')} disabled={tarefaEmOperacao === tarefa.id}>Iniciar</button>
+                                  ) : (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')} disabled={tarefaEmOperacao === tarefa.id}>Não iniciado</button>
+                                  )}
+                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>✓ Concluir</button>
                                 </div>
                               )}
                             </div>
