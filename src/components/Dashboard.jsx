@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
+import LoadingFeedback from './LoadingFeedback';
 
 const STATUS_CONCLUIDOS = ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'];
 const CATEGORIAS = { TRABALHO: 'Trabalho', ESTUDO: 'Estudo', PESSOAL: 'Pessoal' };
@@ -118,6 +119,7 @@ export default function Dashboard() {
 
       {usuario.turma && <p className="dashboard-context">Resumo acadêmico <strong>{usuario.turma}</strong></p>}
       {erro && <div className="dashboard-alert" role="alert">{erro}</div>}
+      {carregando && <LoadingFeedback variant="dashboard" label="Carregando indicadores e desempenho" />}
 
       <section className="dashboard-stats" aria-label="Indicadores do período">
         <article className="stat-card stat-card-completed"><span className="stat-label">Concluídas</span><strong>{carregando ? '—' : metricas.concluidas}</strong><span className="stat-helper">de {metricas.total} tarefas no período</span></article>
@@ -158,7 +160,7 @@ export default function Dashboard() {
       <section className="dashboard-grid">
         <article className="dashboard-card">
           <div className="dashboard-card-heading"><div><p className="dashboard-section-kicker">ORGANIZAÇÃO</p><h2>Tarefas por categoria</h2><p>Como suas atividades estão distribuídas.</p></div></div>
-          {carregando ? <p className="dashboard-empty">Carregando dados...</p> : categoriasOrdenadas.length === 0 ? <p className="dashboard-empty">Ainda não há tarefas neste período.</p> :
+          {carregando ? null : categoriasOrdenadas.length === 0 ? <p className="dashboard-empty">Ainda não há tarefas neste período.</p> :
             <div className="category-chart">
               {categoriasOrdenadas.map(([categoria, quantidade], indice) => (
                 <div className="category-row" key={categoria}>
@@ -170,7 +172,7 @@ export default function Dashboard() {
         </article>
         <article className="dashboard-card">
           <div className="dashboard-card-heading"><div><p className="dashboard-section-kicker">PRÓXIMOS PRAZOS</p><h2>O que vem a seguir</h2><p>Suas próximas atividades em aberto.</p></div></div>
-          {carregando ? <p className="dashboard-empty">Carregando...</p> : metricas.proximas.length === 0 ? <p className="dashboard-empty">Nenhuma tarefa pendente com prazo.</p> :
+          {carregando ? null : metricas.proximas.length === 0 ? <p className="dashboard-empty">Nenhuma tarefa pendente com prazo.</p> :
             <div className="upcoming-list">
               {metricas.proximas.map((tarefa) => (
                 <div className="upcoming-item" key={tarefa.id}>
