@@ -128,7 +128,7 @@ export default function Dashboard() {
       <section className="dashboard-card dashboard-performance">
         <div className="dashboard-card-heading">
           <div><p className="dashboard-section-kicker">EVOLUÇÃO</p><h2>Desempenho recente</h2><p>Quantidade de tarefas por mês, separadas por situação.</p></div>
-          <div className="chart-legend"><span><i className="legend-total" /> Em aberto</span><span><i className="legend-done" /> Concluídas</span></div>
+          <div className="chart-legend"><span><i className="legend-total" /> Não concluídas</span><span><i className="legend-done" /> Concluídas</span></div>
         </div>
         <div className="performance-chart" role="img" aria-label="Gráfico dos últimos seis meses. Cada barra mostra tarefas concluídas e em aberto.">
           {graficoMensal.map((mes) => {
@@ -145,7 +145,7 @@ export default function Dashboard() {
                   </> : <span className="performance-no-data" />}
                 </div>
                 <span className="performance-month">{mes.nome}</span>
-                <small className="performance-detail">{mes.concluidas}/{mes.total}</small>
+                <small className="performance-detail">{abertas} não concluídas · {mes.concluidas} concluídas</small>
                 <span className="sr-only">{abertas} em aberto</span>
               </div>
             );
