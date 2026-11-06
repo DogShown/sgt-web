@@ -25,9 +25,29 @@ export default function Frequencia() {
   const [novaMateria,setNovaMateria] = useState('');
   const [aviso,setAviso] = useState('');
 
+  const aplicarConfig = (valor) => {
+    const normalizada = {...configPadrao,...valor,disciplinas:Array.isArray(valor?.disciplinas)?valor.disciplinas:[]};
+    setConfig(normalizada); setLimite(String(normalizada.limite)); setTotal(String(normalizada.totalPrevisto));
+    setUnidade(normalizada.unidade); setDisciplinasAtivas(Boolean(normalizada.disciplinasAtivas));
+  };
   const carregar = async () => {
-    try { setErro(''); setRegistros(await frequenciaService.listar()); }
-    catch (e) { setErro(e.response?.data?.message || 'Não foi possível carregar a frequência sincronizada.'); }
+    try {
+      setErro('');
+      const [lista, remota] = await Promise.all([frequenciaService.listar(),frequenciaService.obterConfiguracao()]);
+      setRegistros(Array.isArray(lista)?lista:[]);
+      if (remota) {
+        aplicarConfig(remota);
+        localStorage.setItem(configKey,JSON.stringify(remota));
+      } else {
+        const legado=localStorage.getItem(configKey);
+        if (legado) {
+          const antiga=lerConfig(configKey);
+          aplicarConfig(antiga);
+          const sincronizada=await frequenciaService.salvarConfiguracao(antiga);
+          aplicarConfig(sincronizada);
+        }
+      }
+    } catch (e) { setErro(e.response?.data?.message || 'Não foi possível carregar a frequência sincronizada.'); }
     finally { setLoading(false); }
   };
   useEffect(() => {
@@ -48,15 +68,23 @@ export default function Frequencia() {
       setRegistros(atual=>[novo,...atual]); setQuantidade('1');setMateria('');setJustificada(false);setAviso('Ausência registrada e sincronizada com sua conta.');
     } catch(e) {setErro(e.response?.data?.message||'Não foi possível registrar a ausência.');}
   };
-  const salvarConfig = e => {
-    e.preventDefault();
+  const salvarConfig = async e => {
+    e.preventDefault(); setErro(''); setAviso('');
     const nova={...config,limite:Number(limite),totalPrevisto:Number(total),unidade,disciplinasAtivas};
-    setConfig(nova);localStorage.setItem(configKey,JSON.stringify(nova));setAviso('Parâmetros de cálculo salvos neste dispositivo.');
+    try {
+      const salva=await frequenciaService.salvarConfiguracao(nova);
+      aplicarConfig(salva); localStorage.setItem(configKey,JSON.stringify(salva));
+      setAviso('Parâmetros de cálculo salvos e sincronizados com sua conta.');
+    } catch(e) { setErro(e.response?.data?.message || 'Não foi possível sincronizar as configurações.'); }
   };
-  const adicionarMateria = () => {
+  const adicionarMateria = async () => {
     const nome=novaMateria.trim();if(!nome)return;
     const nova={...config,disciplinas:[...new Set([...(config.disciplinas||[]),nome])]};
-    setConfig(nova);localStorage.setItem(configKey,JSON.stringify(nova));setNovaMateria('');
+    try {
+      const salva=await frequenciaService.salvarConfiguracao(nova);
+      aplicarConfig(salva);localStorage.setItem(configKey,JSON.stringify(salva));setNovaMateria('');
+      setAviso('Matéria adicionada e sincronizada com sua conta.');
+    } catch(e) { setErro(e.response?.data?.message || 'Não foi possível sincronizar a matéria.'); }
   };
   const excluir = async id => {
     try {await frequenciaService.excluir(id);setRegistros(atual=>atual.filter(r=>r.id!==id));setAviso('Registro removido da sua conta.');}
@@ -98,6 +126,6 @@ export default function Frequencia() {
       {disciplinasAtivas && <section className="attendance-section"><h2>Frequência por matéria</h2>{Object.entries(porMateria).length===0?<p>Nenhuma falta associada a uma matéria ainda.</p>:Object.entries(porMateria).map(([m,n])=><div className="attendance-subject-row" key={m}><strong>{m}</strong><span>{n} faltas · {Number(total)>0?(n/Number(total)*100).toFixed(1):'0.0'}%</span></div>)}</section>}
       <section className="attendance-section"><h2>Histórico de faltas</h2>{registros.length===0?<p>Você ainda não registrou ausências.</p>:<ul className="attendance-history">{[...registros].sort((a,b)=>b.data.localeCompare(a.data)).map(r=><li key={r.id}><div><strong>{new Date(r.data+'T12:00:00').toLocaleDateString('pt-BR')}</strong><span>{r.quantidade} {r.unidade||unidade}{r.materia?` · ${r.materia}`:''}{r.justificada?' · Justificada':''}</span></div><button type="button" onClick={()=>excluir(r.id)} aria-label="Excluir registro">Remover</button></li>)}</ul>}</section>
     </>}
-    <p className="attendance-disclaimer">Os registros de ausências são armazenados no banco de dados da sua conta e podem ser acessados em outros dispositivos. Os parâmetros de cálculo (limite, total previsto e matérias cadastradas) ainda ficam salvos neste navegador. O resultado é uma estimativa pessoal; confirme com sua escola os critérios oficiais.</p>
+    <p className="attendance-disclaimer">Os registros de ausências são armazenados no banco de dados da sua conta e podem ser acessados em outros dispositivos. Os parâmetros de cálculo (limite, total previsto e matérias cadastradas) também são sincronizados com sua conta. O resultado é uma estimativa pessoal; confirme com sua escola os critérios oficiais.</p>
   </div>;
 }
