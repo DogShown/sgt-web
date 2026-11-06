@@ -8,6 +8,7 @@ import Notificacoes from './components/Notificacoes';
 import Perfil from './components/Perfil';
 import Frequencia from './components/Frequencia';
 import UsuarioResumo from './components/UsuarioResumo';
+import LoadingFeedback from './components/LoadingFeedback';
 import api from './services/api';
 import logo from './assets/logo.jpg';
 
@@ -153,10 +154,10 @@ export default function App() {
 
   if (verificandoSessao) {
     return (
-      <div className="session-loading">
-        <div className="session-loader-card" role="status" aria-live="polite">
-          <div className="session-loader-logo">✓</div><strong>SGT</strong><span>Preparando seu espaço...</span>
-          <div className="session-loader-dots" aria-hidden="true"><i /><i /><i /></div>
+      <div className="session-loading" aria-label="Preparando o SGT">
+        <div className="session-loader-card">
+          <strong>SGT</strong>
+          <LoadingFeedback variant="dashboard" label="Validando sua sessão" />
         </div>
       </div>
     );
