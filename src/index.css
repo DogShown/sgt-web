@@ -5728,3 +5728,7 @@ html[data-theme="escuro"] .notifications-page .notification-icon.danger { color:
 .task-card-bottom { padding-top:4px; }
 .task-skeleton { min-height:70px; }
 @media(max-width:760px){.attendance-overview,.attendance-columns{grid-template-columns:1fr}.profile-discord .profile-form-footer{align-items:stretch;flex-direction:column}.profile-form-actions{justify-content:stretch}.profile-form-actions button{flex:1}.user-overview-actions{flex-direction:column}}
+
+.profile-cover { background-position:center; background-size:cover; }
+.profile-cover-edit { align-self:flex-end; margin-left:auto; padding:7px 11px; border:1px solid rgba(255,255,255,.35); border-radius:8px; color:#fff; background:rgba(0,0,0,.22); cursor:pointer; font-size:.72rem; }
+.profile-cover-edit:hover { background:rgba(0,0,0,.38); }
