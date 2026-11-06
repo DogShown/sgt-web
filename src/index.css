@@ -5732,3 +5732,74 @@ html[data-theme="escuro"] .notifications-page .notification-icon.danger { color:
 .profile-cover { background-position:center; background-size:cover; }
 .profile-cover-edit { align-self:flex-end; margin-left:auto; padding:7px 11px; border:1px solid rgba(255,255,255,.35); border-radius:8px; color:#fff; background:rgba(0,0,0,.22); cursor:pointer; font-size:.72rem; }
 .profile-cover-edit:hover { background:rgba(0,0,0,.38); }
+
+
+/* Design system master UX — tokens, contraste, foco e feedback de espera. */
+:root {
+  --theme-bg: #f3f7fa;
+  --theme-surface: #ffffff;
+  --theme-surface-soft: #edf4f7;
+  --theme-border: #cbd9e1;
+  --theme-text: #243746;
+  --theme-text-strong: #102f42;
+  --theme-text-muted: #526a79;
+  --theme-shadow: rgba(13, 45, 63, .08);
+  --action-primary: #006b78;
+  --action-primary-hover: #00515f;
+  --action-danger: #b42332;
+  --action-danger-hover: #8f1725;
+}
+html[data-theme="escuro"] {
+  --theme-bg: #0b1922;
+  --theme-surface: #122630;
+  --theme-surface-soft: #1a3440;
+  --theme-border: #34515d;
+  --theme-text: #dce8ed;
+  --theme-text-strong: #f0f6f8;
+  --theme-text-muted: #b0c2ca;
+  --theme-shadow: rgba(0,0,0,.2);
+  --action-primary: #42bdc5;
+  --action-primary-hover: #65d0d5;
+  --action-danger: #ff7782;
+  --action-danger-hover: #ff9aa2;
+}
+body, .app-container, .main-content { background: var(--theme-bg); color: var(--theme-text); }
+.dashboard-eyebrow,.dashboard-section-kicker,.profile-section-kicker { color: var(--action-primary); }
+.btn-primary,.period-toggle button.active { background: var(--action-primary); }
+.btn-primary:hover { background: var(--action-primary-hover); }
+.btn-outline { color: var(--action-primary); border-color: var(--action-primary); }
+.btn-outline:hover { background: var(--theme-surface-soft); }
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 3px solid #19a6b5;
+  outline-offset: 3px;
+}
+button:disabled { cursor: not-allowed; opacity: .58; }
+input,select,textarea { accent-color: var(--action-primary); }
+.form-field > span,.profile-field > span { color: var(--theme-text-strong); font-weight: 750; }
+.form-field input,.form-field select,.form-field textarea {
+  min-height: 44px;
+  color: var(--theme-text);
+  background: var(--theme-surface);
+  border: 1px solid var(--theme-border);
+}
+.form-field input::placeholder,.form-field textarea::placeholder { color: var(--theme-text-muted); opacity: .82; }
+.task-delete,.attendance-history button { color: var(--action-danger)!important; }
+.task-delete:hover,.attendance-history button:hover { background: color-mix(in srgb, var(--action-danger) 12%, transparent); }
+.loading-skeleton { display: grid; gap: 0; padding: 8px 0; }
+.skeleton-row { min-height: 68px; display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--theme-border); }
+.skeleton-shape,.skeleton-copy i { display: block; border-radius: 8px; background: linear-gradient(100deg,var(--theme-surface-soft) 20%,color-mix(in srgb,var(--theme-border) 70%,var(--theme-surface)) 38%,var(--theme-surface-soft) 56%); background-size: 220% 100%; animation: skeleton-shimmer 1.35s ease-in-out infinite; }
+.skeleton-icon { width: 34px; height: 34px; border-radius: 50%; flex: 0 0 34px; }
+.skeleton-copy { flex: 1; display: grid; gap: 8px; }
+.skeleton-copy i { height: 11px; width: 62%; }
+.skeleton-copy i:last-child { width: 38%; height: 9px; }
+.skeleton-end { width: 66px; height: 12px; }
+@keyframes skeleton-shimmer { to { background-position-x: -220%; } }
+.loading-wait { margin: 14px 0; padding: 20px; border: 1px solid var(--theme-border); border-radius: 14px; background: var(--theme-surface); }
+.loading-wait-copy { display: grid; gap: 5px; color: var(--theme-text-strong); }
+.loading-wait-copy span,.loading-wait small { color: var(--theme-text-muted); font-size: .82rem; }
+.loading-progress { height: 8px; margin: 16px 0 9px; overflow: hidden; border-radius: 99px; background: var(--theme-surface-soft); }
+.loading-progress span { display: block; width: 35%; height: 100%; border-radius: inherit; background: var(--action-primary); animation: loading-indeterminate 1.5s ease-in-out infinite; }
+@keyframes loading-indeterminate { 0% { transform: translateX(-110%); } 100% { transform: translateX(320%); } }
+@media (prefers-reduced-motion: reduce) {
+  *,*::before,*::after { scroll-behavior: auto!important; animation-duration: .01ms!important; animation-iteration-count: 1!important; transition-duration: .01ms!important; }
+}
