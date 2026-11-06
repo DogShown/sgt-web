@@ -58,6 +58,7 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome, mensag
             <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value.trimStart())} autoComplete="email" maxLength={100} required /></label>
             <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="current-password" required /></label>
             <label className="login-remember"><input type="checkbox" checked={lembrarDeMim} onChange={(event) => setLembrarDeMim(event.target.checked)} /> <span>Lembrar de mim neste dispositivo</span></label>
+          <p className="auth-switch"><button type="button" onClick={() => window.location.assign('/recuperar-senha')}>Esqueci minha senha</button></p>
             <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
           </form>
           <p className="auth-switch">Ainda não possui uma conta? <button type="button" onClick={onCadastro}>Criar conta</button></p>
