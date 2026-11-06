@@ -9,6 +9,16 @@ import Perfil from './components/Perfil';
 import api from './services/api';
 import logo from './assets/logo.jpg';
 
+function NavIcon({ name }) {
+  const paths = {
+    dashboard: <><rect x="3" y="3" width="8" height="8" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="11" width="7" height="10" rx="1.5" /><rect x="3" y="14" width="8" height="7" rx="1.5" /></>,
+    tarefas: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4M16 2v4M8 11h8M8 15h5" /></>,
+    notificacoes: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>,
+    perfil: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+  };
+  return <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
+}
+
 function ThemeToggle({ tema, onToggle, className = '' }) {
   const escuro = tema === 'escuro';
 
@@ -82,7 +92,7 @@ export default function App() {
         const response = await api.get('/auth/me');
         const usuario = response.data;
         localStorage.setItem('sgt_user', JSON.stringify({
-          id: usuario.id, nome: usuario.nome, email: usuario.email, turma: usuario.turma
+          id: usuario.id, nome: usuario.nome, email: usuario.email, turma: usuario.turma, avatarUrl: (() => { try { return JSON.parse(localStorage.getItem('sgt_user') || '{}').avatarUrl || ''; } catch { return ''; } })()
         }));
         setUsuarioLogado(usuario);
       } catch {
@@ -186,22 +196,22 @@ export default function App() {
               <ul className="sidebar-menu">
                 <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
                   <button type="button" className="sidebar-link" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>
-                    <span className="sidebar-link-icon" aria-hidden="true">▦</span><span>Dashboard</span>
+                    <span className="sidebar-link-icon"><NavIcon name="dashboard" /></span><span>Dashboard</span>
                   </button>
                 </li>
                 <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
                   <button type="button" className="sidebar-link" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>
-                    <span className="sidebar-link-icon" aria-hidden="true">✓</span><span>Tarefas</span>
+                    <span className="sidebar-link-icon"><NavIcon name="tarefas" /></span><span>Tarefas</span>
                   </button>
                 </li>
                 <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
                   <button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>
-                    <span className="sidebar-link-icon" aria-hidden="true">◉</span><span>Notificações</span>
+                    <span className="sidebar-link-icon"><NavIcon name="notificacoes" /></span><span>Notificações</span>
                   </button>
                 </li>
                 <li className={abaAtiva === 'perfil' ? 'active' : ''}>
                   <button type="button" className="sidebar-link" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>
-                    <span className="sidebar-link-icon" aria-hidden="true">◎</span><span>Meu perfil</span>
+                    <span className="sidebar-link-icon"><NavIcon name="perfil" /></span><span>Meu perfil</span>
                   </button>
                 </li>
               </ul>
@@ -210,7 +220,7 @@ export default function App() {
 
           <div className="sidebar-footer">
             <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('perfil')}>
-              <span className="sidebar-avatar">{(usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
+              <span className="sidebar-avatar">{usuarioLogado.avatarUrl ? <img src={usuarioLogado.avatarUrl} alt="" /> : (usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
               <span className="sidebar-user-copy">
                 <small>Usuário</small>
                 <strong>{usuarioLogado.nome || 'Usuário'}</strong>
