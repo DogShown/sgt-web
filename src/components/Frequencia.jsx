@@ -1,12 +1,20 @@
 import { useMemo, useState } from 'react';
 
-const KEY = 'sgt_attendance_v1';
+const obterChaveArmazenamento = () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+    return `sgt_attendance_v1:${usuario.id ?? 'usuario'}`;
+  } catch {
+    return 'sgt_attendance_v1:usuario';
+  }
+};
 const pad = (n) => String(n).padStart(2, '0');
 const hojeISO = () => { const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; };
-const ler = () => { try { return JSON.parse(localStorage.getItem(KEY) || '{"config":{"limite":25,"totalPrevisto":200,"unidade":"dias","disciplinasAtivas":false,"disciplinas":[]},"registros":[]}'); } catch { return {config:{limite:25,totalPrevisto:200,unidade:'dias',disciplinasAtivas:false,disciplinas:[]},registros:[]}; } };
+const ler = (chave) => { try { return JSON.parse(localStorage.getItem(chave) || '{"config":{"limite":25,"totalPrevisto":200,"unidade":"dias","disciplinasAtivas":false,"disciplinas":[]},"registros":[]}'); } catch { return {config:{limite:25,totalPrevisto:200,unidade:'dias',disciplinasAtivas:false,disciplinas:[]},registros:[]}; } };
 
 export default function Frequencia() {
-  const [dados,setDados] = useState(ler);
+  const [chaveArmazenamento] = useState(obterChaveArmazenamento);
+  const [dados,setDados] = useState(() => ler(chaveArmazenamento));
   const [data,setData] = useState(hojeISO());
   const [quantidade,setQuantidade] = useState('1');
   const [materia,setMateria] = useState('');
@@ -18,7 +26,7 @@ export default function Frequencia() {
   const [novaMateria,setNovaMateria] = useState('');
   const [aviso,setAviso] = useState('');
 
-  const salvar = (novo) => { setDados(novo); localStorage.setItem(KEY,JSON.stringify(novo)); };
+  const salvar = (novo) => { setDados(novo); localStorage.setItem(chaveArmazenamento,JSON.stringify(novo)); };
   const faltas = dados.registros.reduce((s,r)=>s+Number(r.quantidade || 1),0);
   const percentual = Number(total)>0 ? faltas/Number(total)*100 : 0;
   const margem = Math.max(0,Math.floor(Number(total)*Number(limite)/100)-faltas);
@@ -77,6 +85,6 @@ export default function Frequencia() {
     </section>
     {disciplinasAtivas && <section className="attendance-section"><h2>Frequência por matéria</h2>{Object.entries(porMateria).length===0?<p>Nenhuma falta associada a uma matéria ainda.</p>:Object.entries(porMateria).map(([m,n])=><div className="attendance-subject-row" key={m}><strong>{m}</strong><span>{n} faltas · {Number(total)>0?(n/Number(total)*100).toFixed(1):'0.0'}%</span></div>)}</section>}
     <section className="attendance-section"><h2>Histórico de faltas</h2>{dados.registros.length===0?<p>Você ainda não registrou ausências.</p>:<ul className="attendance-history">{[...dados.registros].sort((a,b)=>b.data.localeCompare(a.data)).map(r=><li key={r.id}><div><strong>{new Date(r.data+'T12:00:00').toLocaleDateString('pt-BR')}</strong><span>{r.quantidade} {dados.config.unidade}{r.materia? ` · ${r.materia}`:''}{r.justificada?' · Justificada':''}</span></div><button type="button" onClick={()=>excluir(r.id)} aria-label="Excluir registro">Remover</button></li>)}</ul>}</section>
-    <p className="attendance-disclaimer">O resultado é uma estimativa pessoal, calculada com os dados informados. Confirme com sua escola quais ausências entram no cálculo oficial e qual é o total previsto do período.</p>
+    <p className="attendance-disclaimer">Os registros de frequência ficam salvos somente neste navegador e neste dispositivo, associados à conta atualmente conectada. Eles ainda não são sincronizados com o banco de dados nem aparecem automaticamente em outros dispositivos. O resultado é uma estimativa pessoal, calculada com os dados informados. Confirme com sua escola quais ausências entram no cálculo oficial e qual é o total previsto do período.</p>
   </div>;
 }
