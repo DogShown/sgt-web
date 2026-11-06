@@ -80,6 +80,19 @@ export default function Notificacoes() {
     verificarPush().catch(() => {});
   }, []);
 
+  const desativarPush = async () => {
+    setPushErro('');
+    setPushCarregando(true);
+    try {
+      await pushService.desativar();
+      setPushAtivo(false);
+    } catch (error) {
+      setPushErro(error.response?.data?.message || 'Não foi possível desativar as notificações neste dispositivo.');
+    } finally {
+      setPushCarregando(false);
+    }
+  };
+
   const ativarPush = async () => {
     setPushErro('');
     setPushCarregando(true);
@@ -110,7 +123,7 @@ export default function Notificacoes() {
       <header className="page-header notifications-header">
         <div><p className="dashboard-eyebrow">SGT • Central de avisos</p><h1>Notificações</h1><p>{naoLidas ? naoLidas + ' não lida(s)' : 'Tudo em dia por aqui.'}</p></div>
         <div className="notification-actions">
-          {pushService.supported() && !pushAtivo && <button type="button" className="btn-outline" onClick={ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Ativando...' : 'Ativar notificações'}</button>}
+          {pushService.supported() && <button type="button" className={pushAtivo ? 'btn-ghost' : 'btn-outline'} onClick={pushAtivo ? desativarPush : ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Aguarde...' : pushAtivo ? 'Desativar neste dispositivo' : 'Ativar notificações push'}</button>}
           {naoLidas > 0 && <button className="btn-ghost" onClick={marcarTodas}>Marcar todas como lidas</button>}
         </div>
       </header>
@@ -129,7 +142,7 @@ export default function Notificacoes() {
           })}
       </section>
       {pushErro && <p className="push-note push-error" role="alert">{pushErro}</p>}
-      <p className="push-note"><strong>Notificações do dispositivo:</strong> em navegadores compatíveis, você pode ativar o Web Push para receber avisos mesmo quando a página não estiver aberta. O servidor precisa estar com as chaves VAPID configuradas.</p>
+      <p className="push-note"><strong>Notificações push:</strong> {pushAtivo ? 'Este dispositivo está inscrito para receber lembretes.' : 'Ative para receber lembretes de tarefas próximas e atrasadas mesmo quando o SGT não estiver aberto.'} O navegador precisa permitir notificações e o servidor precisa ter as chaves VAPID configuradas.</p>
     </div>
   );
 }
