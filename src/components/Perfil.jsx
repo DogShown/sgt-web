@@ -1,18 +1,53 @@
-import React, { useEffect, useState } from 'react';
+import { useRef, useState } from 'react';
 import { perfilService } from '../services/perfilService';
-import logo from '../assets/logo.jpg';
 
-export default function Perfil({ usuario, onUsuarioAtualizado }) {
+const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
+
+export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
   const [nome, setNome] = useState(usuario?.nome || '');
   const [turma, setTurma] = useState(usuario?.turma || '');
+  const [avatarUrl, setAvatarUrl] = useState(usuario?.avatarUrl || '');
+  const [corCapa, setCorCapa] = useState(usuario?.corCapa || '#075b70');
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const inputFotoRef = useRef(null);
 
-  useEffect(() => {
-    setNome(usuario?.nome || '');
-    setTurma(usuario?.turma || '');
-  }, [usuario]);
+  const iniciais = (nome || 'Usuário').split(' ').filter(Boolean).slice(0, 2).map((parte) => parte[0]).join('').toUpperCase();
+
+  const selecionarFoto = (event) => {
+    const arquivo = event.target.files?.[0];
+    event.target.value = '';
+    if (!arquivo) return;
+    if (!arquivo.type.startsWith('image/')) {
+      setErro('Selecione um arquivo de imagem válido.');
+      return;
+    }
+    if (arquivo.size > MAX_AVATAR_SIZE) {
+      setErro('A imagem deve ter no máximo 2 MB.');
+      return;
+    }
+    const leitor = new FileReader();
+    leitor.onload = () => {
+      const imagem = new Image();
+      imagem.onload = () => {
+        const tamanho = 320;
+        const escala = Math.min(tamanho / imagem.width, tamanho / imagem.height, 1);
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(imagem.width * escala));
+        canvas.height = Math.max(1, Math.round(imagem.height * escala));
+        canvas.getContext('2d').drawImage(imagem, 0, 0, canvas.width, canvas.height);
+        const otimizada = canvas.toDataURL('image/jpeg', 0.82);
+        setAvatarUrl(otimizada);
+        setErro('');
+        setMensagem('Prévia da foto atualizada. Salve o perfil para manter neste dispositivo.');
+      };
+      imagem.onerror = () => setErro('Não foi possível ler essa imagem.');
+      imagem.src = leitor.result;
+    };
+    leitor.onerror = () => setErro('Não foi possível abrir o arquivo selecionado.');
+    leitor.readAsDataURL(arquivo);
+  };
 
   const salvar = async (event) => {
     event.preventDefault();
@@ -20,183 +55,65 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
     setMensagem('');
     setSalvando(true);
     try {
-      const atualizado = await perfilService.atualizar({ nome: nome.trim(), turma: turma.trim() });
-      localStorage.setItem('sgt_user', JSON.stringify(atualizado));
-      onUsuarioAtualizado(atualizado);
+      // Nome, turma e personalização são mantidos localmente até existir endpoint de perfil no backend.
+      const usuarioCompleto = { ...usuario, nome: nome.trim(), turma: turma.trim(), avatarUrl, corCapa };
+      try {
+        localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
+      } catch {
+        throw new Error('Não foi possível guardar a foto neste dispositivo. Tente uma imagem menor.');
+      }
+      onUsuarioAtualizado(usuarioCompleto);
       setMensagem('Perfil atualizado com sucesso.');
     } catch (error) {
-      setErro(error.response?.data?.message || 'Não foi possível atualizar seu perfil.');
+      setErro(error.response?.data?.message || error.message || 'Não foi possível atualizar seu perfil.');
     } finally {
       setSalvando(false);
     }
   };
 
-  const iniciais = (nome || 'Usuário')
-    .split(' ')
-    .filter(Boolean)
-    .slice(0, 2)
-    .map(p => p[0])
-    .join('')
-    .toUpperCase();
+  const removerFoto = () => {
+    setAvatarUrl('');
+    setMensagem('A foto será removida ao salvar o perfil.');
+  };
 
   return (
-    <div className="min-h-screen bg-[#F3F6F9] text-slate-800 p-4 sm:p-6 md:p-8 font-sans antialiased">
-      <div className="max-w-5xl mx-auto space-y-6">
-        
-        {/* Cabeçalho da Página */}
-        <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 pb-2">
-          <div className="space-y-1">
-            <span className="inline-block text-[11px] font-bold uppercase tracking-wider text-[#0B435B]/70 bg-[#0B435B]/10 px-2.5 py-0.5 rounded-full">
-              SGT • Minha conta
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-[#093545]">
-              Meu perfil
-            </h1>
-            <p className="text-xs sm:text-sm text-slate-500">
-              Personalize suas informações para deixar o SGT com a sua cara.
-            </p>
+    <div className="profile-page profile-discord">
+      <header className="page-header profile-header">
+        <div><p className="dashboard-eyebrow">SGT / CONTA</p><h1>Meu perfil</h1><p>Personalize sua identidade e mantenha seus dados atualizados.</p></div>
+      </header>
+
+      <section className="profile-main-card">
+        <div className="profile-cover" style={{'--profile-cover-color':corCapa}} aria-hidden="true"><span>SGT</span></div>
+        <div className="profile-identity">
+          <div className="profile-avatar-wrap">
+            <div className="profile-avatar" style={{backgroundColor:corCapa}} aria-label={`Foto de perfil de ${nome || 'Usuário'}`}>
+              {avatarUrl ? <img src={avatarUrl} alt="" /> : iniciais}
+            </div>
+            <button type="button" className="profile-avatar-edit" onClick={() => inputFotoRef.current?.click()} aria-label="Alterar foto de perfil" title="Alterar foto">✎</button>
+            <input ref={inputFotoRef} className="profile-file-input" type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={selecionarFoto} />
           </div>
-          {logo && (
-            <div className="flex-shrink-0">
-              <img src={logo} alt="Logo SGT" className="h-10 w-auto rounded-md object-contain" />
-            </div>
-          )}
-        </header>
+          <div className="profile-identity-copy"><span className="profile-status"><i /> Conta SGT</span><h2>{nome || 'Usuário'}</h2><p>{usuario?.email || 'E-mail não informado'}</p></div>
+          <div className="profile-identity-actions">
+            <button type="button" className="btn-outline" onClick={() => inputFotoRef.current?.click()}>Alterar foto</button>
+            {avatarUrl && <button type="button" className="btn-ghost" onClick={removerFoto}>Remover</button>}
+          </div>
+        </div>
 
-        {/* Layout em Grid */}
-        <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          
-          {/* Card Esquerdo: Card do Usuário */}
-          <article className="lg:col-span-4 bg-white border border-slate-200/80 rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-            
-            {/* Avatar em Círculo no estilo SGT */}
-            <div className="w-20 h-20 rounded-full bg-[#093545] text-white flex items-center justify-center text-2xl font-bold mb-4 shadow-inner">
-              {iniciais}
-            </div>
+        <div className="profile-content">
+          <div className="profile-content-heading"><div><p className="profile-section-kicker">SEU ESPAÇO</p><h2>Informações da conta</h2><p>Esses dados ajudam a identificar seu perfil dentro do SGT.</p></div></div>
+          {mensagem && <div className="profile-feedback success" role="status">{mensagem}</div>}
+          {erro && <div className="profile-feedback error" role="alert">{erro}</div>}
 
-            <h2 className="text-lg font-bold text-[#093545] break-all">
-              {nome || 'Usuário'}
-            </h2>
-            
-            <p className="text-xs text-slate-500 mb-4 break-all">
-              {usuario?.email || 'email@exemplo.com'}
-            </p>
-
-            {/* Badge da Turma estilo Padrão SGT */}
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8F3F1] text-[#093545] border border-[#BCE1DA]">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#0B435B]" />
-              {turma || 'Turma não definida'}
-            </span>
-          </article>
-
-          {/* Card Direito: Formulário de Edição */}
-          <article className="lg:col-span-8 bg-white border border-slate-200/80 rounded-2xl p-6 sm:p-8 shadow-sm space-y-6">
-            <div className="border-b border-slate-100 pb-4">
-              <p className="text-xs font-bold uppercase tracking-wider text-[#0B435B]">
-                Dados pessoais
-              </p>
-              <h2 className="text-xl font-bold text-[#093545] mt-0.5">
-                Personalizar perfil
-              </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Atualize nome e turma sem alterar seu acesso.
-              </p>
-            </div>
-
-            {/* Alerta de Sucesso */}
-            {mensagem && (
-              <div className="flex items-center gap-2 p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs sm:text-sm font-medium" role="status">
-                <svg className="w-4 h-4 text-emerald-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span>{mensagem}</span>
-              </div>
-            )}
-
-            {/* Alerta de Erro */}
-            {erro && (
-              <div className="flex items-center gap-2 p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs sm:text-sm font-medium" role="alert">
-                <svg className="w-4 h-4 text-rose-600 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0 1 18 0z" />
-                </svg>
-                <span>{erro}</span>
-              </div>
-            )}
-
-            {/* Formulário */}
-            <form className="space-y-4" onSubmit={salvar}>
-              
-              {/* Nome */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Nome
-                </label>
-                <input
-                  type="text"
-                  value={nome}
-                  onChange={e => setNome(e.target.value)}
-                  required
-                  maxLength={100}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#093545]/30 focus:border-[#093545] transition-all text-sm"
-                  placeholder="Seu nome completo"
-                />
-              </div>
-
-              {/* E-mail */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  E-mail
-                </label>
-                <input
-                  type="email"
-                  value={usuario?.email || ''}
-                  disabled
-                  className="w-full px-3.5 py-2 bg-slate-100 border border-slate-200 rounded-lg text-slate-400 cursor-not-allowed text-sm"
-                />
-              </div>
-
-              {/* Turma */}
-              <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-                  Turma
-                </label>
-                <input
-                  type="text"
-                  value={turma}
-                  onChange={e => setTurma(e.target.value.toUpperCase())}
-                  placeholder="Ex.: INF3BM"
-                  required
-                  maxLength={50}
-                  className="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#093545]/30 focus:border-[#093545] transition-all text-sm uppercase"
-                />
-                <p className="text-[11px] text-slate-500 leading-tight">
-                  Padrão técnico: curso + ano + turma + período. Ex.: INF3BM.
-                </p>
-              </div>
-
-              {/* Botão Salvar */}
-              <button
-                type="submit"
-                disabled={salvando}
-                className="w-full mt-2 py-2.5 px-4 bg-[#093545] hover:bg-[#0B435B] active:bg-[#062632] disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-sm rounded-lg transition-colors shadow-sm flex items-center justify-center gap-2"
-              >
-                {salvando ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                    </svg>
-                    <span>Salvando...</span>
-                  </>
-                ) : (
-                  'Salvar alterações'
-                )}
-              </button>
-            </form>
-          </article>
-
-        </section>
-      </div>
+          <form className="profile-form profile-form-grid" onSubmit={salvar}>
+            <label className="profile-field"><span>Nome completo</span><input type="text" value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} placeholder="Digite seu nome completo" autoComplete="name" /></label>
+            <label className="profile-field"><span>Nome de usuário</span><input type="text" value={usuario?.email || ''} disabled /><small>Seu e-mail é usado para entrar no SGT.</small></label>
+            <label className="profile-field"><span>Turma</span><input type="text" value={turma} onChange={(event) => setTurma(event.target.value.toUpperCase())} placeholder="Ex.: INF3BM" required maxLength={50} autoComplete="organization" /><small>Curso, ano e período.</small></label>
+            <label className="profile-field"><span>Cor de fundo do perfil</span><input type="color" value={corCapa} onChange={e=>setCorCapa(e.target.value)} /></label>
+            <div className="profile-field profile-account-type"><span>Tipo de conta</span><div className="profile-account-value"><span className="profile-account-dot" /> Conta pessoal</div></div>
+            <div className="profile-form-footer"><span>Foto e personalização ficam salvas neste navegador. A sincronização entre dispositivos será adicionada com suporte no servidor.</span><div className="profile-form-actions"><button type="button" className="btn-outline" onClick={onSair}>Sair da conta</button><button type="submit" className="profile-save-button" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'} <span aria-hidden="true">→</span></button></div></div>
+          </form>
+        </div>
+      </section>
     </div>
   );
 }

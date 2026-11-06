@@ -13,6 +13,11 @@ export const tarefaService = {
     return response.data;
   },
 
+  alterarStatus: async (id, status) => {
+    const response = await api.put(`/tarefas/${id}/status`, null, { params: { status } });
+    return response.data;
+  },
+
   // Conclui uma tarefa (o backend define se foi no prazo ou com atraso)
   concluir: async (id) => {
     const response = await api.put(`/tarefas/${id}/concluir`);

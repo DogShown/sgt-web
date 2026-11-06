@@ -1,5 +1,5 @@
 self.addEventListener('push', (event) => {
-  let data = {};
+  let data;
 
   try {
     data = event.data ? event.data.json() : {};
@@ -13,7 +13,7 @@ self.addEventListener('push', (event) => {
   const title = data.title || 'SGT';
   const options = {
     body: data.body || 'Você recebeu uma nova notificação.',
-    data: { url: data.url || '/notificacoes' },
+    data: { url: '/?tab=notificacoes' },
     vibrate: [100, 50, 100],
   };
 
@@ -23,19 +23,18 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  const targetUrl = new URL(
-    event.notification.data?.url || '/notificacoes',
-    self.location.origin
-  ).href;
+  // O SGT usa navegação por estado, não rotas de URL para as abas internas.
+  // Abrir a raiz evita enviar o usuário para uma rota que não existe no frontend.
+  const targetUrl = new URL('/?tab=notificacoes', self.location.origin).href;
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
       const sameOriginClient = clientList.find((client) => client.url.startsWith(self.location.origin));
       if (sameOriginClient) {
         sameOriginClient.navigate(targetUrl);
         return sameOriginClient.focus();
       }
-      return clients.openWindow(targetUrl);
+      return self.clients.openWindow(targetUrl);
     })
   );
 });

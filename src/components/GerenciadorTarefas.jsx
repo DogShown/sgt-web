@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
-import logo from '../assets/logo.jpg';
 
 const formatarData = (data) => {
   if (!data) return 'Sem prazo';
@@ -52,7 +51,7 @@ function GerenciadorTarefas() {
   const [erro, setErro] = useState('');
   const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
-  const [tarefaArrastada, setTarefaArrastada] = useState(null);
+  const [tarefaEmOperacao, setTarefaEmOperacao] = useState(null);
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -62,14 +61,12 @@ function GerenciadorTarefas() {
 
   const carregarTarefas = async () => {
     try {
-      setErro('');
-      setLoading(true);
       const dados = await tarefaService.listarPorUsuario();
       const tarefasNormalizadas = Array.isArray(dados)
         ? dados.map((tarefa) => ({ ...tarefa, status: normalizarStatus(tarefa.status) }))
         : [];
       setTarefas(tarefasNormalizadas);
-    } catch (err) {
+    } catch {
       setErro('Erro ao carregar a lista de tarefas.');
     } finally {
       setLoading(false);
@@ -77,6 +74,8 @@ function GerenciadorTarefas() {
   };
 
   useEffect(() => {
+    // A carga é assíncrona; os estados mudam após a resposta da API.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     carregarTarefas();
   }, []);
 
@@ -97,11 +96,15 @@ function GerenciadorTarefas() {
     e.preventDefault();
     setErro('');
     setSucesso('');
+    if (!titulo.trim()) {
+      setErro('Informe um título válido para a tarefa.');
+      return;
+    }
     setCriando(true);
 
     const novaTarefaDTO = {
-      titulo,
-      descricao,
+      titulo: titulo.trim(),
+      descricao: descricao.trim(),
       categoria,
       prioridade,
       dataEntrega,
@@ -120,62 +123,52 @@ function GerenciadorTarefas() {
     }
   };
 
-  const handleConcluir = async (id) => {
+  const handleAlterarStatus = async (id, status) => {
+    if (tarefaEmOperacao === id) return;
     try {
+      setTarefaEmOperacao(id);
+      setErro('');
+      setSucesso('');
+      await tarefaService.alterarStatus(id, status);
+      setSucesso(status === 'EM_ANDAMENTO' ? 'Tarefa movida para Em andamento.' : 'Tarefa movida para Não iniciado.');
+      await carregarTarefas();
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Não foi possível atualizar o status da tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
+    }
+  };
+
+  const handleConcluir = async (id) => {
+    if (tarefaEmOperacao === id) return;
+    try {
+      setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
       await tarefaService.concluir(id);
       setSucesso('Tarefa marcada como concluída.');
       await carregarTarefas();
-    } catch (err) {
-      setErro('Erro ao concluir a tarefa.');
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Erro ao concluir a tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
     }
   };
 
   const handleDeletar = async (id) => {
-    if (window.confirm('Tem certeza que deseja excluir esta tarefa?')) {
-      try {
-        setErro('');
-        await tarefaService.deletar(id);
-        await carregarTarefas();
-      } catch (err) {
-        setErro('Erro ao excluir a tarefa.');
-      }
+    if (tarefaEmOperacao === id || !window.confirm('Tem certeza que deseja excluir esta tarefa? Esta ação não pode ser desfeita.')) return;
+    try {
+      setTarefaEmOperacao(id);
+      setErro('');
+      setSucesso('');
+      await tarefaService.deletar(id);
+      setSucesso('Tarefa excluída.');
+      await carregarTarefas();
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Erro ao excluir a tarefa.');
+    } finally {
+      setTarefaEmOperacao(null);
     }
-  };
-
-  const moverTarefa = async (id, statusDestino) => {
-    if (!id) return;
-
-    const destinoNormalizado = normalizarStatus(statusDestino);
-
-    setTarefas((tarefasAtuais) =>
-      tarefasAtuais.map((tarefa) =>
-        tarefa.id === id ? { ...tarefa, status: destinoNormalizado } : tarefa
-      )
-    );
-
-    if (destinoNormalizado === 'CONCLUIDA') {
-      try {
-        await tarefaService.concluir(id);
-        setSucesso('Tarefa movida para concluída.');
-      } catch (err) {
-        setErro('Erro ao atualizar o status da tarefa.');
-      }
-    } else {
-      setSucesso('Status da tarefa atualizado.');
-    }
-
-    setTarefaArrastada(null);
-  };
-
-  const handleDragStart = (id) => {
-    setTarefaArrastada(id);
-  };
-
-  const handleDrop = async (statusDestino) => {
-    if (!tarefaArrastada) return;
-    await moverTarefa(tarefaArrastada, statusDestino);
   };
 
   return (
@@ -216,6 +209,7 @@ function GerenciadorTarefas() {
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 placeholder="Ex.: Trabalho de Matemática"
+                maxLength={100}
                 required
               />
             </label>
@@ -299,8 +293,6 @@ function GerenciadorTarefas() {
                 <div
                   key={coluna.id}
                   className="kanban-column"
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={() => handleDrop(coluna.id)}
                 >
                   <div className="kanban-column-header">
                     <div className="kanban-column-title">
@@ -313,7 +305,7 @@ function GerenciadorTarefas() {
                   <div className="kanban-column-body">
                     {(!tarefasPorColuna[coluna.id] || tarefasPorColuna[coluna.id].length === 0) ? (
                       <div className="kanban-empty-state">
-                        <p>Arraste uma tarefa aqui</p>
+                        <p>Nenhuma tarefa nesta etapa.</p>
                       </div>
                     ) : (
                       tarefasPorColuna[coluna.id].map((tarefa) => {
@@ -324,9 +316,6 @@ function GerenciadorTarefas() {
                           <article
                             className={`task-card ${concluida ? 'concluida' : ''}`}
                             key={tarefa.id}
-                            draggable
-                            onDragStart={() => handleDragStart(tarefa.id)}
-                            onDragEnd={() => setTarefaArrastada(null)}
                           >
                             <div className="task-card-top">
                               <div className="task-title-wrap">
@@ -336,7 +325,7 @@ function GerenciadorTarefas() {
                                   {tarefa.descricao && <p>{tarefa.descricao}</p>}
                                 </div>
                               </div>
-                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
+                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
                                 ×
                               </button>
                             </div>
@@ -353,9 +342,20 @@ function GerenciadorTarefas() {
                               </span>
 
                               {!concluida && (
-                                <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
-                                  ✓ Concluir
-                                </button>
+                                <div className="task-actions">
+                                  {normalizarStatus(tarefa.status) === 'NAO_INICIADO' ? (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')} disabled={tarefaEmOperacao === tarefa.id}>
+                                      Iniciar
+                                    </button>
+                                  ) : (
+                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')} disabled={tarefaEmOperacao === tarefa.id}>
+                                      Não iniciado
+                                    </button>
+                                  )}
+                                  <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
+                                    ✓ Concluir
+                                  </button>
+                                </div>
                               )}
                             </div>
                           </article>

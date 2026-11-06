@@ -6,7 +6,21 @@ import Dashboard from './components/Dashboard';
 import GerenciadorTarefas from './components/GerenciadorTarefas';
 import Notificacoes from './components/Notificacoes';
 import Perfil from './components/Perfil';
+import Frequencia from './components/Frequencia';
+import UsuarioResumo from './components/UsuarioResumo';
 import api from './services/api';
+import logo from './assets/logo.jpg';
+
+function NavIcon({ name }) {
+  const paths = {
+    dashboard: <><rect x="3" y="3" width="8" height="8" rx="1.5" /><rect x="14" y="3" width="7" height="5" rx="1.5" /><rect x="14" y="11" width="7" height="10" rx="1.5" /><rect x="3" y="14" width="8" height="7" rx="1.5" /></>,
+    tarefas: <><rect x="4" y="4" width="16" height="17" rx="2" /><path d="M8 2v4M16 2v4M8 11h8M8 15h5" /></>,
+    notificacoes: <><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></>,
+    perfil: <><circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" /></>,
+    frequencia: <><path d="M4 19V5m0 14h16M8 15l3-4 3 2 5-7" /></>,
+  };
+  return <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{paths[name]}</svg>;
+}
 
 function ThemeToggle({ tema, onToggle, className = '' }) {
   const escuro = tema === 'escuro';
@@ -28,9 +42,37 @@ function ThemeToggle({ tema, onToggle, className = '' }) {
 export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [telaPublica, setTelaPublica] = useState('home');
-  const [abaAtiva, setAbaAtiva] = useState('dashboard');
+  const [abaAtiva, setAbaAtiva] = useState(() => (
+    new URLSearchParams(window.location.search).get('tab') === 'notificacoes'
+      ? 'notificacoes'
+      : 'dashboard'
+  ));
   const [verificandoSessao, setVerificandoSessao] = useState(true);
   const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
+  const [mensagemSessao, setMensagemSessao] = useState('');
+
+  useEffect(() => {
+    const encerrarSessaoExpirada = () => {
+      localStorage.removeItem('sgt_token');
+      sessionStorage.removeItem('sgt_token');
+      localStorage.removeItem('sgt_user');
+      setUsuarioLogado(null);
+      setTelaPublica('login');
+      setMensagemSessao('Sua sessão expirou ou não é mais válida. Entre novamente para continuar.');
+    };
+    window.addEventListener('sgt:session-expired', encerrarSessaoExpirada);
+    return () => window.removeEventListener('sgt:session-expired', encerrarSessaoExpirada);
+  }, []);
+
+  useEffect(() => {
+    // A aba é lida da URL uma única vez; remove o parâmetro para não reaplicá-lo
+    // em recargas futuras depois que a pessoa navegar para outra seção.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('tab')) {
+      url.searchParams.delete('tab');
+      window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+    }
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = tema;
@@ -43,7 +85,7 @@ export default function App() {
 
   useEffect(() => {
     const verificarSessao = async () => {
-      const token = localStorage.getItem('sgt_token');
+      const token = localStorage.getItem('sgt_token') || sessionStorage.getItem('sgt_token');
       if (!token) {
         setVerificandoSessao(false);
         return;
@@ -52,12 +94,19 @@ export default function App() {
       try {
         const response = await api.get('/auth/me');
         const usuario = response.data;
-        localStorage.setItem('sgt_user', JSON.stringify({
-          id: usuario.id, nome: usuario.nome, email: usuario.email, turma: usuario.turma
-        }));
-        setUsuarioLogado(usuario);
+        const usuarioSalvo = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+        const usuarioCompleto = {
+          id: usuario.id,
+          nome: usuario.nome,
+          email: usuario.email,
+          turma: usuario.turma,
+          avatarUrl: usuarioSalvo.avatarUrl || ''
+        };
+        localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
+        setUsuarioLogado(usuarioCompleto);
       } catch {
         localStorage.removeItem('sgt_token');
+        sessionStorage.removeItem('sgt_token');
         localStorage.removeItem('sgt_user');
       } finally {
         setVerificandoSessao(false);
@@ -70,6 +119,7 @@ export default function App() {
   const handleLoginSucesso = () => {
     const user = localStorage.getItem('sgt_user');
     if (user) setUsuarioLogado(JSON.parse(user));
+    setMensagemSessao('');
   };
 
   const handleUsuarioAtualizado = (usuarioAtualizado) => {
@@ -79,6 +129,7 @@ export default function App() {
 
   const handleLogout = () => {
     localStorage.removeItem('sgt_token');
+    sessionStorage.removeItem('sgt_token');
     localStorage.removeItem('sgt_user');
     setUsuarioLogado(null);
     setAbaAtiva('dashboard');
@@ -113,7 +164,8 @@ export default function App() {
           <Login
             onLoginSucesso={handleLoginSucesso}
             onCadastro={() => setTelaPublica('cadastro')}
-            onVoltarHome={() => setTelaPublica('home')}
+            onVoltarHome={() => { setMensagemSessao(''); setTelaPublica('home'); }}
+            mensagemInicial={mensagemSessao}
           />
         )}
 
@@ -139,31 +191,61 @@ export default function App() {
     <div className="screen-transition" key={screenKey}>
       <div className="app-container">
         <aside className="sidebar" aria-label="Barra lateral do SGT">
-          <div>
-            <div className="sidebar-header"><h2>SGT</h2></div>
-            <nav aria-label="Navegação principal"><ul className="sidebar-menu">
-              <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>Dashboard</button>
-              </li>
-              <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>Tarefas</button>
-              </li>
-              <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>Notificações</button>
-              </li>
-              <li className={abaAtiva === 'perfil' ? 'active' : ''}>
-                <button type="button" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>Meu perfil</button>
-              </li>
-            </ul></nav>
+          <div className="sidebar-main">
+            <div className="sidebar-brand">
+              <img src={logo} alt="" className="sidebar-brand-logo" />
+              <span className="sidebar-brand-copy">
+                <strong>SGT</strong>
+                <small>Organize sua rotina</small>
+              </span>
+            </div>
+
+            <div className="sidebar-nav-label">MENU PRINCIPAL</div>
+            <nav aria-label="Navegação principal">
+              <ul className="sidebar-menu">
+                <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>
+                    <span className="sidebar-link-icon"><NavIcon name="dashboard" /></span><span>Dashboard</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>
+                    <span className="sidebar-link-icon"><NavIcon name="tarefas" /></span><span>Tarefas</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'frequencia' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'frequencia' ? 'page' : undefined} onClick={() => setAbaAtiva('frequencia')}>
+                    <span className="sidebar-link-icon"><NavIcon name="frequencia" /></span><span>Frequência</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>
+                    <span className="sidebar-link-icon"><NavIcon name="notificacoes" /></span><span>Notificações</span>
+                  </button>
+                </li>
+                <li className={abaAtiva === 'perfil' ? 'active' : ''}>
+                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>
+                    <span className="sidebar-link-icon"><NavIcon name="perfil" /></span><span>Meu perfil</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
           </div>
 
-          <div className="sidebar-user">
-            <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('perfil')}>
-              <span className="sidebar-avatar">{(usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
-              <span><small>Usuário</small><strong>{usuarioLogado.nome || 'Usuário'}</strong><em>{usuarioLogado.turma || 'Turma não definida'}</em></span>
+          <div className="sidebar-footer">
+            <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('usuario')}>
+              <span className="sidebar-avatar">{usuarioLogado.avatarUrl ? <img src={usuarioLogado.avatarUrl} alt="" /> : (usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
+              <span className="sidebar-user-copy">
+                <small>Minha conta</small>
+                <strong>{usuarioLogado.nome || 'Usuário'}</strong>
+                <em>{usuarioLogado.turma || 'Turma não definida'}</em>
+              </span>
+              <span className="sidebar-profile-chevron" aria-hidden="true">↗</span>
             </button>
-            <ThemeToggle tema={tema} onToggle={alternarTema} />
-            <button onClick={handleLogout} className="logout-button">Sair</button>
+            <div className="sidebar-footer-actions">
+              <ThemeToggle tema={tema} onToggle={alternarTema} />
+
+            </div>
           </div>
         </aside>
 
@@ -174,7 +256,11 @@ export default function App() {
               ? <GerenciadorTarefas />
               : abaAtiva === 'notificacoes'
                 ? <Notificacoes />
-                : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} />}
+                : abaAtiva === 'frequencia'
+                  ? <Frequencia />
+                  : abaAtiva === 'usuario'
+                    ? <UsuarioResumo usuario={usuarioLogado} onPerfil={() => setAbaAtiva('perfil')} onSair={handleLogout} />
+                    : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} onSair={handleLogout} />}
         </main>
       </div>
     </div>

@@ -1,12 +1,13 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { loginService } from '../services/loginServices';
 import logo from '../assets/logocanuflada.jpg';
 
-export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
+export default function Login({ onLoginSucesso, onCadastro, onVoltarHome, mensagemInicial = '' }) {
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
-  const [erro, setErro] = useState('');
+  const [erro, setErro] = useState(mensagemInicial);
   const [enviando, setEnviando] = useState(false);
+  const [lembrarDeMim, setLembrarDeMim] = useState(false);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -14,8 +15,11 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
     setEnviando(true);
 
     try {
-      const usuario = await loginService.login(email, senha);
-      localStorage.setItem('sgt_token', usuario.token);
+      const usuario = await loginService.login(email.trim().toLowerCase(), senha, lembrarDeMim);
+      localStorage.removeItem('sgt_token');
+      sessionStorage.removeItem('sgt_token');
+      const armazenamento = lembrarDeMim ? localStorage : sessionStorage;
+      armazenamento.setItem('sgt_token', usuario.token);
       localStorage.setItem('sgt_user', JSON.stringify({
         id: usuario.id,
         nome: usuario.nome,
@@ -59,9 +63,9 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome }) {
           {erro && <div className="form-message error" role="alert" aria-live="assertive">{erro}</div>}
 
           <form onSubmit={handleSubmit} aria-busy={enviando}>
-            <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" required /></label>
+            <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value.trimStart())} autoComplete="email" maxLength={100} required /></label>
             <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="current-password" required /></label>
-            <div className="form-options"><label><input type="checkbox" /> <span>Lembrar de mim</span></label><button type="button" className="forgot-link" disabled>Esqueci minha senha</button></div>
+            <label className="login-remember"><input type="checkbox" checked={lembrarDeMim} onChange={(event) => setLembrarDeMim(event.target.checked)} /> <span>Lembrar de mim neste dispositivo</span></label>
             <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
           </form>
 

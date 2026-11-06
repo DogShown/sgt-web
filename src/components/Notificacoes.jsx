@@ -1,9 +1,26 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 import { pushService } from '../services/pushService';
-import logo from '../assets/logo.jpg';
 
 const STORAGE_KEY = 'sgt_notifications_read';
+
+const obterChaveLeitura = () => {
+  try {
+    const usuario = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+    return `${STORAGE_KEY}:${usuario.id ?? usuario.email ?? 'usuario'}`;
+  } catch {
+    return `${STORAGE_KEY}:usuario`;
+  }
+};
+
+const lerIdsLidos = (chave) => {
+  try {
+    const dados = JSON.parse(localStorage.getItem(chave) || '[]');
+    return Array.isArray(dados) ? dados : [];
+  } catch {
+    return [];
+  }
+};
 const dataLocal = (data) => {
   if (!data) return null;
   const [y, m, d] = data.split('-').map(Number);
@@ -12,14 +29,19 @@ const dataLocal = (data) => {
 
 export default function Notificacoes() {
   const [tarefas, setTarefas] = useState([]);
-  const [lidas, setLidas] = useState(() => JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'));
+  const [chaveLeitura] = useState(obterChaveLeitura);
+  const [lidas, setLidas] = useState(() => lerIdsLidos(chaveLeitura));
   const [carregando, setCarregando] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState('');
   const [pushAtivo, setPushAtivo] = useState(false);
   const [pushCarregando, setPushCarregando] = useState(false);
   const [pushErro, setPushErro] = useState('');
 
   useEffect(() => {
-    tarefaService.listarPorUsuario().then(dados => setTarefas(Array.isArray(dados) ? dados : [])).catch(() => setTarefas([])).finally(() => setCarregando(false));
+    tarefaService.listarPorUsuario()
+      .then((dados) => setTarefas(Array.isArray(dados) ? dados : []))
+      .catch(() => setErroCarregamento('Não foi possível carregar as notificações. Verifique sua conexão e tente novamente.'))
+      .finally(() => setCarregando(false));
   }, []);
 
   const notificacoes = useMemo(() => {
@@ -28,7 +50,7 @@ export default function Notificacoes() {
     return tarefas.flatMap(t => {
       if (!t.dataEntrega) return [];
       const prazo = dataLocal(t.dataEntrega);
-      const concluida = ['CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status);
+      const concluida = ['CONCLUIDA', 'CONCLUIDA_NO_PRAZO', 'CONCLUIDA_COM_ATRASO'].includes(t.status);
       if (concluida) return [{ id: 'done-' + t.id, tipo: 'success', titulo: 'Tarefa concluída', texto: t.titulo, horario: 'Agora' }];
       const diff = Math.ceil((prazo - hoje) / 86400000);
       if (diff < 0) return [{ id: 'late-' + t.id, tipo: 'danger', titulo: 'Tarefa atrasada', texto: t.titulo, horario: Math.abs(diff) + ' dia(s) em atraso' }];
@@ -41,12 +63,12 @@ export default function Notificacoes() {
   const marcarLida = (id) => {
     const novas = [...new Set([...lidas, id])];
     setLidas(novas);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));
+    localStorage.setItem(chaveLeitura, JSON.stringify(novas));
   };
   const marcarTodas = () => {
     const novas = [...new Set([...lidas, ...notificacoes.map(n => n.id)])];
     setLidas(novas);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(novas));
+    localStorage.setItem(chaveLeitura, JSON.stringify(novas));
   };
   useEffect(() => {
     const verificarPush = async () => {
@@ -58,10 +80,26 @@ export default function Notificacoes() {
     verificarPush().catch(() => {});
   }, []);
 
+  const desativarPush = async () => {
+    setPushErro('');
+    setPushCarregando(true);
+    try {
+      await pushService.desativar();
+      setPushAtivo(false);
+    } catch (error) {
+      setPushErro(error.response?.data?.message || 'Não foi possível desativar as notificações neste dispositivo.');
+    } finally {
+      setPushCarregando(false);
+    }
+  };
+
   const ativarPush = async () => {
     setPushErro('');
     setPushCarregando(true);
     try {
+      if (!pushService.supported()) {
+        throw new Error('Este navegador ou dispositivo não oferece suporte a notificações push.');
+      }
       if (Notification.permission === 'default') {
         const permission = await Notification.requestPermission();
         if (permission !== 'granted') throw new Error('A permissão para notificações não foi concedida.');
@@ -85,12 +123,13 @@ export default function Notificacoes() {
       <header className="page-header notifications-header">
         <div><p className="dashboard-eyebrow">SGT • Central de avisos</p><h1>Notificações</h1><p>{naoLidas ? naoLidas + ' não lida(s)' : 'Tudo em dia por aqui.'}</p></div>
         <div className="notification-actions">
-          {!pushAtivo && <button className="btn-outline" onClick={ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Ativando...' : 'Ativar notificações'}</button>}
+          {pushService.supported() && <button type="button" className={pushAtivo ? 'btn-ghost' : 'btn-outline'} onClick={pushAtivo ? desativarPush : ativarPush} disabled={pushCarregando}>{pushCarregando ? 'Aguarde...' : pushAtivo ? 'Desativar neste dispositivo' : 'Ativar notificações push'}</button>}
           {naoLidas > 0 && <button className="btn-ghost" onClick={marcarTodas}>Marcar todas como lidas</button>}
         </div>
       </header>
       <section className="notifications-list">
         {carregando ? <div className="notifications-empty">Carregando notificações...</div> :
+          erroCarregamento ? <div className="notifications-empty" role="alert"><h2>Não foi possível carregar</h2><p>{erroCarregamento}</p><button type="button" className="btn-outline" onClick={() => window.location.reload()}>Tentar novamente</button></div> :
           notificacoes.length === 0 ? <div className="notifications-empty"><span>✓</span><h2>Nenhuma notificação</h2><p>Quando houver uma tarefa próxima, atrasada ou concluída, ela aparecerá aqui.</p></div> :
           notificacoes.map(n => {
             const lida = lidas.includes(n.id);
@@ -103,7 +142,7 @@ export default function Notificacoes() {
           })}
       </section>
       {pushErro && <p className="push-note push-error" role="alert">{pushErro}</p>}
-      <p className="push-note"><strong>Notificações do dispositivo:</strong> ao ativar, o SGT registra este navegador para receber Web Push mesmo quando a página não estiver aberta. O servidor precisa estar com as chaves VAPID configuradas.</p>
+      <p className="push-note"><strong>Notificações push:</strong> {pushAtivo ? 'Este dispositivo está inscrito para receber lembretes.' : 'Ative para receber lembretes de tarefas próximas e atrasadas mesmo quando o SGT não estiver aberto.'} O navegador precisa permitir notificações e o servidor precisa ter as chaves VAPID configuradas.</p>
     </div>
   );
 }

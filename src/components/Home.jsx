@@ -47,12 +47,12 @@ export default function Home({ onLogin, onCadastro, themeToggle }) {
           <h3>Equipe do Projeto</h3>
           <ul className="landing-team-list">
             
-            <li><strong>Nº 1 - Antônio Nunes da Silva</strong><span>RM: 99080 | Time de Desenvolvimento</span></li>
-            <li><strong>Nº 4 - Deryk Henry dos Santos Silva</strong><span>RM: 99760 | Time de Desenvolvimento</span></li>
-            <li><strong>Nº 5 - Eloá Raquel Pereira Silva</strong><span>RM: 95281 | Time de Desenvolvimento</span></li>
-            <li><strong>Nº 6 - Ester Beserra dos Santos</strong><span>RM: 99877 | Time de Desenvolvimento</span></li>
-            <li><strong>Nº 7 - Ewerton Vagner da Silva</strong><span>RM: 99750 | Product Owner</span></li>
-            <li><strong>Nº 28 - Stephany dos Santos Bandeira</strong><span>RM: 100423 | Scrum Master</span></li>
+            <li><strong>Antônio Nunes da Silva</strong><span>Time de Desenvolvimento</span></li>
+            <li><strong>Deryk Henry dos Santos Silva</strong><span>Time de Desenvolvimento</span></li>
+            <li><strong>Eloá Raquel Pereira Silva</strong><span>Time de Desenvolvimento</span></li>
+            <li><strong>Ester Beserra dos Santos</strong><span>Time de Desenvolvimento</span></li>
+            <li><strong>Ewerton Vagner da Silva</strong><span>Product Owner</span></li>
+            <li><strong>Stephany dos Santos Bandeira</strong><span>Scrum Master</span></li>
 
           </ul>
         </div>
