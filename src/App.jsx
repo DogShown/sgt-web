@@ -24,15 +24,9 @@ function NavIcon({ name }) {
 
 function ThemeToggle({ tema, onToggle, className = '' }) {
   const escuro = tema === 'escuro';
-
   return (
-    <button
-      type="button"
-      className={`theme-toggle ${className}`}
-      onClick={onToggle}
-      aria-label={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'}
-      title={escuro ? 'Tema claro' : 'Tema escuro'}
-    >
+    <button type="button" className={`theme-toggle ${className}`} onClick={onToggle}
+      aria-label={escuro ? 'Ativar tema claro' : 'Ativar tema escuro'} title={escuro ? 'Tema claro' : 'Tema escuro'}>
       <span className="theme-toggle-icon" aria-hidden="true">{escuro ? '☀' : '☾'}</span>
       <span className="theme-toggle-label">{escuro ? 'Claro' : 'Escuro'}</span>
     </button>
@@ -43,9 +37,7 @@ export default function App() {
   const [usuarioLogado, setUsuarioLogado] = useState(null);
   const [telaPublica, setTelaPublica] = useState('home');
   const [abaAtiva, setAbaAtiva] = useState(() => (
-    new URLSearchParams(window.location.search).get('tab') === 'notificacoes'
-      ? 'notificacoes'
-      : 'dashboard'
+    new URLSearchParams(window.location.search).get('tab') === 'notificacoes' ? 'notificacoes' : 'dashboard'
   ));
   const [verificandoSessao, setVerificandoSessao] = useState(true);
   const [tema, setTema] = useState(() => localStorage.getItem('sgt_theme') || 'claro');
@@ -65,8 +57,6 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    // A aba é lida da URL uma única vez; remove o parâmetro para não reaplicá-lo
-    // em recargas futuras depois que a pessoa navegar para outra seção.
     const url = new URL(window.location.href);
     if (url.searchParams.has('tab')) {
       url.searchParams.delete('tab');
@@ -79,9 +69,7 @@ export default function App() {
     localStorage.setItem('sgt_theme', tema);
   }, [tema]);
 
-  const alternarTema = () => {
-    setTema((temaAtual) => temaAtual === 'escuro' ? 'claro' : 'escuro');
-  };
+  const alternarTema = () => setTema(temaAtual => temaAtual === 'escuro' ? 'claro' : 'escuro');
 
   useEffect(() => {
     const verificarSessao = async () => {
@@ -93,14 +81,41 @@ export default function App() {
 
       try {
         const response = await api.get('/auth/me');
-        const usuario = response.data;
+        let usuario = response.data;
         const usuarioSalvo = JSON.parse(localStorage.getItem('sgt_user') || '{}');
+
+        // Migra uma personalização antiga do navegador para a conta uma única vez.
+        const temPersonalizacaoLocal = Boolean(
+          usuarioSalvo.avatarUrl ||
+          usuarioSalvo.imagemCapa ||
+          (usuarioSalvo.corCapa && usuarioSalvo.corCapa !== '#075b70')
+        );
+        const perfilServidorVazio = !usuario.avatarUrl && !usuario.imagemCapa &&
+          (!usuario.corCapa || usuario.corCapa === '#075b70');
+
+        if (temPersonalizacaoLocal && perfilServidorVazio) {
+          try {
+            const migracao = await api.put('/auth/me', {
+              nome: usuario.nome,
+              turma: usuario.turma,
+              avatarUrl: usuarioSalvo.avatarUrl || null,
+              corCapa: usuarioSalvo.corCapa || '#075b70',
+              imagemCapa: usuarioSalvo.imagemCapa || null
+            });
+            usuario = migracao.data;
+          } catch {
+            // A sessão continua válida mesmo se a migração opcional falhar.
+          }
+        }
+
         const usuarioCompleto = {
           id: usuario.id,
           nome: usuario.nome,
           email: usuario.email,
           turma: usuario.turma,
-          avatarUrl: usuarioSalvo.avatarUrl || ''
+          avatarUrl: usuario.avatarUrl || '',
+          corCapa: usuario.corCapa || '#075b70',
+          imagemCapa: usuario.imagemCapa || ''
         };
         localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
         setUsuarioLogado(usuarioCompleto);
@@ -122,7 +137,7 @@ export default function App() {
     setMensagemSessao('');
   };
 
-  const handleUsuarioAtualizado = (usuarioAtualizado) => {
+  const handleUsuarioAtualizado = usuarioAtualizado => {
     localStorage.setItem('sgt_user', JSON.stringify(usuarioAtualizado));
     setUsuarioLogado(usuarioAtualizado);
   };
@@ -140,49 +155,24 @@ export default function App() {
     return (
       <div className="session-loading">
         <div className="session-loader-card" role="status" aria-live="polite">
-          <div className="session-loader-logo">✓</div>
-          <strong>SGT</strong>
-          <span>Preparando seu espaço...</span>
+          <div className="session-loader-logo">✓</div><strong>SGT</strong><span>Preparando seu espaço...</span>
           <div className="session-loader-dots" aria-hidden="true"><i /><i /><i /></div>
         </div>
       </div>
     );
   }
 
-  const screenKey = usuarioLogado
-    ? `private-${abaAtiva}`
-    : `public-${telaPublica}`;
+  const screenKey = usuarioLogado ? `private-${abaAtiva}` : `public-${telaPublica}`;
 
   if (!usuarioLogado) {
     return (
       <div className="screen-transition" key={screenKey}>
-        {telaPublica !== 'home' && (
-          <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />
-        )}
-
-        {telaPublica === 'login' && (
-          <Login
-            onLoginSucesso={handleLoginSucesso}
-            onCadastro={() => setTelaPublica('cadastro')}
-            onVoltarHome={() => { setMensagemSessao(''); setTelaPublica('home'); }}
-            mensagemInicial={mensagemSessao}
-          />
-        )}
-
-        {telaPublica === 'cadastro' && (
-          <Cadastro
-            onVoltarLogin={() => setTelaPublica('login')}
-            onCadastroSucesso={() => setTelaPublica('login')}
-          />
-        )}
-
-        {telaPublica === 'home' && (
-          <Home
-            onLogin={() => setTelaPublica('login')}
-            onCadastro={() => setTelaPublica('cadastro')}
-            themeToggle={<ThemeToggle className="landing-theme-toggle" tema={tema} onToggle={alternarTema} />}
-          />
-        )}
+        {telaPublica !== 'home' && <ThemeToggle className="theme-toggle-public" tema={tema} onToggle={alternarTema} />}
+        {telaPublica === 'login' && <Login onLoginSucesso={handleLoginSucesso} onCadastro={() => setTelaPublica('cadastro')}
+          onVoltarHome={() => { setMensagemSessao(''); setTelaPublica('home'); }} mensagemInicial={mensagemSessao} />}
+        {telaPublica === 'cadastro' && <Cadastro onVoltarLogin={() => setTelaPublica('login')} onCadastroSucesso={() => setTelaPublica('login')} />}
+        {telaPublica === 'home' && <Home onLogin={() => setTelaPublica('login')} onCadastro={() => setTelaPublica('cadastro')}
+          themeToggle={<ThemeToggle className="landing-theme-toggle" tema={tema} onToggle={alternarTema} />} />}
       </div>
     );
   }
@@ -192,75 +182,36 @@ export default function App() {
       <div className="app-container">
         <aside className="sidebar" aria-label="Barra lateral do SGT">
           <div className="sidebar-main">
-            <div className="sidebar-brand">
-              <img src={logo} alt="" className="sidebar-brand-logo" />
-              <span className="sidebar-brand-copy">
-                <strong>SGT</strong>
-                <small>Organize sua rotina</small>
-              </span>
-            </div>
-
+            <div className="sidebar-brand"><img src={logo} alt="" className="sidebar-brand-logo" /><span className="sidebar-brand-copy"><strong>SGT</strong><small>Organize sua rotina</small></span></div>
             <div className="sidebar-nav-label">MENU PRINCIPAL</div>
             <nav aria-label="Navegação principal">
               <ul className="sidebar-menu">
-                <li className={abaAtiva === 'dashboard' ? 'active' : ''}>
-                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}>
-                    <span className="sidebar-link-icon"><NavIcon name="dashboard" /></span><span>Dashboard</span>
-                  </button>
-                </li>
-                <li className={abaAtiva === 'tarefas' ? 'active' : ''}>
-                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}>
-                    <span className="sidebar-link-icon"><NavIcon name="tarefas" /></span><span>Tarefas</span>
-                  </button>
-                </li>
-                <li className={abaAtiva === 'frequencia' ? 'active' : ''}>
-                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'frequencia' ? 'page' : undefined} onClick={() => setAbaAtiva('frequencia')}>
-                    <span className="sidebar-link-icon"><NavIcon name="frequencia" /></span><span>Frequência</span>
-                  </button>
-                </li>
-                <li className={abaAtiva === 'notificacoes' ? 'active' : ''}>
-                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}>
-                    <span className="sidebar-link-icon"><NavIcon name="notificacoes" /></span><span>Notificações</span>
-                  </button>
-                </li>
-                <li className={abaAtiva === 'perfil' ? 'active' : ''}>
-                  <button type="button" className="sidebar-link" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}>
-                    <span className="sidebar-link-icon"><NavIcon name="perfil" /></span><span>Meu perfil</span>
-                  </button>
-                </li>
+                <li className={abaAtiva === 'dashboard' ? 'active' : ''}><button type="button" className="sidebar-link" aria-current={abaAtiva === 'dashboard' ? 'page' : undefined} onClick={() => setAbaAtiva('dashboard')}><span className="sidebar-link-icon"><NavIcon name="dashboard" /></span><span>Dashboard</span></button></li>
+                <li className={abaAtiva === 'tarefas' ? 'active' : ''}><button type="button" className="sidebar-link" aria-current={abaAtiva === 'tarefas' ? 'page' : undefined} onClick={() => setAbaAtiva('tarefas')}><span className="sidebar-link-icon"><NavIcon name="tarefas" /></span><span>Tarefas</span></button></li>
+                <li className={abaAtiva === 'frequencia' ? 'active' : ''}><button type="button" className="sidebar-link" aria-current={abaAtiva === 'frequencia' ? 'page' : undefined} onClick={() => setAbaAtiva('frequencia')}><span className="sidebar-link-icon"><NavIcon name="frequencia" /></span><span>Frequência</span></button></li>
+                <li className={abaAtiva === 'notificacoes' ? 'active' : ''}><button type="button" className="sidebar-link" aria-current={abaAtiva === 'notificacoes' ? 'page' : undefined} onClick={() => setAbaAtiva('notificacoes')}><span className="sidebar-link-icon"><NavIcon name="notificacoes" /></span><span>Notificações</span></button></li>
+                <li className={abaAtiva === 'perfil' ? 'active' : ''}><button type="button" className="sidebar-link" aria-current={abaAtiva === 'perfil' ? 'page' : undefined} onClick={() => setAbaAtiva('perfil')}><span className="sidebar-link-icon"><NavIcon name="perfil" /></span><span>Meu perfil</span></button></li>
               </ul>
             </nav>
           </div>
-
           <div className="sidebar-footer">
             <button type="button" className="sidebar-profile-button" onClick={() => setAbaAtiva('usuario')}>
-              <span className="sidebar-avatar">{usuarioLogado.avatarUrl ? <img src={usuarioLogado.avatarUrl} alt="" /> : (usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}</span>
-              <span className="sidebar-user-copy">
-                <small>Minha conta</small>
-                <strong>{usuarioLogado.nome || 'Usuário'}</strong>
-                <em>{usuarioLogado.turma || 'Turma não definida'}</em>
+              <span className="sidebar-avatar" style={{backgroundColor:usuarioLogado.corCapa || '#075b70'}}>
+                {usuarioLogado.avatarUrl ? <img src={usuarioLogado.avatarUrl} alt="" /> : (usuarioLogado.nome || 'U').split(' ').filter(Boolean).slice(0, 2).map(p => p[0]).join('').toUpperCase()}
               </span>
+              <span className="sidebar-user-copy"><small>Minha conta</small><strong>{usuarioLogado.nome || 'Usuário'}</strong><em>{usuarioLogado.turma || 'Turma não definida'}</em></span>
               <span className="sidebar-profile-chevron" aria-hidden="true">↗</span>
             </button>
-            <div className="sidebar-footer-actions">
-              <ThemeToggle tema={tema} onToggle={alternarTema} />
-
-            </div>
+            <div className="sidebar-footer-actions"><ThemeToggle tema={tema} onToggle={alternarTema} /></div>
           </div>
         </aside>
-
         <main id="conteudo-principal" className="main-content">
-          {abaAtiva === 'dashboard'
-            ? <Dashboard />
-            : abaAtiva === 'tarefas'
-              ? <GerenciadorTarefas />
-              : abaAtiva === 'notificacoes'
-                ? <Notificacoes />
-                : abaAtiva === 'frequencia'
-                  ? <Frequencia />
-                  : abaAtiva === 'usuario'
-                    ? <UsuarioResumo usuario={usuarioLogado} onPerfil={() => setAbaAtiva('perfil')} onSair={handleLogout} />
-                    : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} onSair={handleLogout} />}
+          {abaAtiva === 'dashboard' ? <Dashboard />
+            : abaAtiva === 'tarefas' ? <GerenciadorTarefas />
+            : abaAtiva === 'notificacoes' ? <Notificacoes />
+            : abaAtiva === 'frequencia' ? <Frequencia />
+            : abaAtiva === 'usuario' ? <UsuarioResumo usuario={usuarioLogado} onPerfil={() => setAbaAtiva('perfil')} onSair={handleLogout} />
+            : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} onSair={handleLogout} />}
         </main>
       </div>
     </div>
