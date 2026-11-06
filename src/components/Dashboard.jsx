@@ -57,8 +57,9 @@ export default function Dashboard() {
       mes.total += 1;
       if (STATUS_CONCLUIDOS.includes(tarefa.status)) mes.concluidas += 1;
     });
-    return resultado;
-  }, [meses, tarefas]);
+    const hoje = new Date();
+    return periodo === 'mes' ? resultado.filter((mes) => mes.chave === hoje.getFullYear() + '-' + String(hoje.getMonth() + 1).padStart(2, '0')) : resultado;
+  }, [meses, tarefas, periodo]);
 
   const metricas = useMemo(() => {
     const hoje = new Date();
@@ -127,7 +128,7 @@ export default function Dashboard() {
 
       <section className="dashboard-card dashboard-performance">
         <div className="dashboard-card-heading">
-          <div><p className="dashboard-section-kicker">EVOLUÇÃO</p><h2>Desempenho recente</h2><p>Quantidade de tarefas por mês, separadas por situação.</p></div>
+          <div><p className="dashboard-section-kicker">EVOLUÇÃO</p><h2>{periodo === 'mes' ? 'Desempenho deste mês' : 'Desempenho dos últimos 6 meses'}</h2><p>{periodo === 'mes' ? 'Visão das tarefas com prazo neste mês.' : 'Comparativo mensal das tarefas por situação.'}</p></div>
           <div className="chart-legend"><span><i className="legend-total" /> Não concluídas</span><span><i className="legend-done" /> Concluídas</span></div>
         </div>
         <div className="performance-chart" role="img" aria-label="Gráfico dos últimos seis meses. Cada barra mostra tarefas concluídas e em aberto.">
@@ -151,7 +152,7 @@ export default function Dashboard() {
             );
           })}
         </div>
-        <p className="chart-footnote">Os números consideram o mês do prazo de entrega de cada tarefa.</p>
+        <p className="chart-footnote">Os números consideram o prazo de entrega no período selecionado.</p>
       </section>
 
       <section className="dashboard-grid">
