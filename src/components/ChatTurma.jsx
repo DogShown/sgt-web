@@ -23,7 +23,7 @@ export default function ChatTurma() {
       reconnectDelay:5000,
       onConnect:()=>{
         setConectado(true);setErro('');
-        client.subscribe('/topic/turma/'+encodeURIComponent(turma),frame=>{
+        client.subscribe('/topic/turma/'+turma,frame=>{
           try{setMensagens(atual=>[...atual,JSON.parse(frame.body)].slice(-100));}
           catch{setErro('Recebemos uma mensagem em formato inválido.');}
         });
@@ -39,7 +39,7 @@ export default function ChatTurma() {
   const enviar=e=>{
     e.preventDefault();const conteudo=texto.trim();const client=clientRef.current;
     if(!conteudo||!client?.connected)return;
-    client.publish({destination:'/app/chat.enviar/'+encodeURIComponent(turma),body:JSON.stringify({conteudo})});
+    client.publish({destination:'/app/chat.enviar/'+turma,body:JSON.stringify({conteudo})});
     setTexto('');
   };
 
