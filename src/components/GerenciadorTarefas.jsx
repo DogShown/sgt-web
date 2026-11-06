@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
+import LoadingFeedback from './LoadingFeedback';
 
 const formatarData = (data) => {
   if (!data) return 'Sem prazo';
@@ -129,11 +130,14 @@ function GerenciadorTarefas() {
       setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
-      await tarefaService.alterarStatus(id, status);
+      const anterior = tarefas.find(t => t.id === id);
+      setTarefas(lista => lista.map(t => t.id === id ? { ...t, status: normalizarStatus(status) } : t));
       setSucesso(status === 'EM_ANDAMENTO' ? 'Tarefa movida para Em andamento.' : 'Tarefa movida para Não iniciado.');
-      await carregarTarefas();
+      await tarefaService.alterarStatus(id, status);
+      if (anterior) await carregarTarefas();
     } catch (error) {
-      setErro(error.response?.data?.message || 'Não foi possível atualizar o status da tarefa.');
+      await carregarTarefas();
+      setErro(error.response?.data?.message || 'Não foi possível atualizar o status da tarefa. A alteração foi revertida.');
     } finally {
       setTarefaEmOperacao(null);
     }
@@ -145,11 +149,13 @@ function GerenciadorTarefas() {
       setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
-      await tarefaService.concluir(id);
+      setTarefas(lista => lista.map(t => t.id === id ? { ...t, status: 'CONCLUIDA' } : t));
       setSucesso('Tarefa marcada como concluída.');
+      await tarefaService.concluir(id);
       await carregarTarefas();
     } catch (error) {
-      setErro(error.response?.data?.message || 'Erro ao concluir a tarefa.');
+      await carregarTarefas();
+      setErro(error.response?.data?.message || 'Erro ao concluir a tarefa. A alteração foi revertida.');
     } finally {
       setTarefaEmOperacao(null);
     }
@@ -161,11 +167,14 @@ function GerenciadorTarefas() {
       setTarefaEmOperacao(id);
       setErro('');
       setSucesso('');
+      const tarefaRemovida = tarefas.find(t => t.id === id);
+      setTarefas(lista => lista.filter(t => t.id !== id));
       await tarefaService.deletar(id);
       setSucesso('Tarefa excluída.');
-      await carregarTarefas();
+      if (tarefaRemovida) await carregarTarefas();
     } catch (error) {
-      setErro(error.response?.data?.message || 'Erro ao excluir a tarefa.');
+      await carregarTarefas();
+      setErro(error.response?.data?.message || 'Erro ao excluir a tarefa. A tarefa foi restaurada na lista.');
     } finally {
       setTarefaEmOperacao(null);
     }
@@ -275,83 +284,8 @@ function GerenciadorTarefas() {
           </div>
 
           {loading ? (
-            <div className="kanban-board kanban-skeletons">
-              {statusColunas.map((coluna) => (
-                <div className="kanban-column" key={coluna.id}>
-                  <div className="kanban-column-header skeleton-header" />
-                  <div className="task-card task-skeleton">
-                    <div className="skeleton-line skeleton-title" />
-                    <div className="skeleton-line skeleton-short" />
-                    <div className="skeleton-line skeleton-meta" />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <LoadingFeedback variant="tasks" label="Carregando suas tarefas" />
           ) : (
-            <div className="kanban-board">
-              {statusColunas.map((coluna) => (
-                <div
-                  key={coluna.id}
-                  className="kanban-column"
-                >
-                  <div className="kanban-column-header">
-                    <div className="kanban-column-title">
-                      <span className={`kanban-dot ${coluna.id.toLowerCase()}`} aria-hidden="true" />
-                      <h3>{coluna.titulo}</h3>
-                    </div>
-                    <span className="kanban-count">{tarefasPorColuna[coluna.id]?.length || 0}</span>
-                  </div>
-
-                  <div className="kanban-column-body">
-                    {(!tarefasPorColuna[coluna.id] || tarefasPorColuna[coluna.id].length === 0) ? (
-                      <div className="kanban-empty-state">
-                        <p>Nenhuma tarefa nesta etapa.</p>
-                      </div>
-                    ) : (
-                      tarefasPorColuna[coluna.id].map((tarefa) => {
-                        const concluida = normalizarStatus(tarefa.status) === 'CONCLUIDA';
-                        const prioridadeClass = (tarefa.prioridade || 'MEDIA').toLowerCase();
-
-                        return (
-                          <article
-                            className={`task-card ${concluida ? 'concluida' : ''}`}
-                            key={tarefa.id}
-                          >
-                            <div className="task-card-top">
-                              <div className="task-title-wrap">
-                                <span className={`task-status-dot ${concluida ? 'concluida' : ''}`} aria-hidden="true" />
-                                <div>
-                                  <h3>{tarefa.titulo}</h3>
-                                  {tarefa.descricao && <p>{tarefa.descricao}</p>}
-                                </div>
-                              </div>
-                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>
-                                ×
-                              </button>
-                            </div>
-
-                            <div className="task-meta">
-                              <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
-                              <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
-                              <span className="task-date"><span aria-hidden="true">📅</span> {formatarData(tarefa.dataEntrega)}</span>
-                            </div>
-
-                            <div className="task-card-bottom">
-                              <span className={`task-status-label ${concluida ? 'concluida' : ''}`}>
-                                {labelStatus[normalizarStatus(tarefa.status)] || 'Pendente'}
-                              </span>
-
-                              {!concluida && (
-                                <div className="task-actions">
-                                  {normalizarStatus(tarefa.status) === 'NAO_INICIADO' ? (
-                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'EM_ANDAMENTO')} disabled={tarefaEmOperacao === tarefa.id}>
-                                      Iniciar
-                                    </button>
-                                  ) : (
-                                    <button className="task-status-action" type="button" onClick={() => handleAlterarStatus(tarefa.id, 'PENDENTE')} disabled={tarefaEmOperacao === tarefa.id}>
-                                      Não iniciado
-                                    </button>
-                                  )}
                                   <button className="task-complete" type="button" onClick={() => handleConcluir(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Marcar "${tarefa.titulo}" como concluída`}>
                                     ✓ Concluir
                                   </button>
