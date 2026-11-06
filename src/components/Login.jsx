@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { loginService } from '../services/loginServices';
 import logo from '../assets/logocanuflada.jpg';
 
 export default function Login({ onLoginSucesso, onCadastro, onVoltarHome, mensagemInicial = '' }) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [senha, setSenha] = useState('');
   const [erro, setErro] = useState(mensagemInicial);
@@ -57,8 +59,7 @@ export default function Login({ onLoginSucesso, onCadastro, onVoltarHome, mensag
           <form onSubmit={handleSubmit} aria-busy={enviando}>
             <label className="form-field"><span>E-mail</span><input type="email" value={email} onChange={(e) => setEmail(e.target.value.trimStart())} autoComplete="email" maxLength={100} required /></label>
             <label className="form-field"><span>Senha</span><input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} autoComplete="current-password" required /></label>
-            <label className="login-remember"><input type="checkbox" checked={lembrarDeMim} onChange={(event) => setLembrarDeMim(event.target.checked)} /> <span>Lembrar de mim neste dispositivo</span></label>
-          <p className="auth-switch"><button type="button" onClick={() => window.location.assign('/recuperar-senha')}>Esqueci minha senha</button></p>
+            <div className="form-options"><label className="login-remember"><input type="checkbox" checked={lembrarDeMim} onChange={(event) => setLembrarDeMim(event.target.checked)} /> <span>Manter conectado</span></label><button className="forgot-link" type="button" onClick={() => navigate('/recuperar-senha')}>Esqueci minha senha</button></div>
             <button className="btn-primary btn-full" type="submit" disabled={enviando} aria-busy={enviando}>{enviando ? 'Entrando...' : 'Entrar'}</button>
           </form>
           <p className="auth-switch">Ainda não possui uma conta? <button type="button" onClick={onCadastro}>Criar conta</button></p>
