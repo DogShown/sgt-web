@@ -28,7 +28,7 @@ export default function ChatTurma() {
     if (!token || !turma) return undefined;
 
     const apiBase = import.meta.env.VITE_API_URL || '/api';
-    const wsUrl = apiBase.replace(/\\/api\\/?$/, '') + '/ws-sgt';
+    const wsUrl = apiBase.replace(/\/api\/?$/, '') + '/ws-sgt';
     const client = new Client({
       webSocketFactory: () => new SockJS(wsUrl),
       connectHeaders: { Authorization: 'Bearer ' + token },
