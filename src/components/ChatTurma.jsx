@@ -6,15 +6,14 @@ export default function ChatTurma() {
   const [mensagens,setMensagens]=useState([]);
   const [texto,setTexto]=useState('');
   const [conectado,setConectado]=useState(false);
-  const [erro,setErro]=useState('');
+  const [erro,setErro]=useState(()=>{const token=localStorage.getItem('sgt_token')||sessionStorage.getItem('sgt_token');return !token?'Entre novamente para acessar o chat.':!turma?'Sua conta não possui uma turma definida.':'';});
   const clientRef=useRef(null);
   const usuario=(()=>{try{return JSON.parse(localStorage.getItem('sgt_user')||'{}');}catch{return {};}})();
   const turma=usuario.turma||'';
 
   useEffect(()=>{
     const token=localStorage.getItem('sgt_token')||sessionStorage.getItem('sgt_token');
-    if(!token){setErro('Entre novamente para acessar o chat.');return;}
-    if(!turma){setErro('Sua conta não possui uma turma definida.');return;}
+    if(!token || !turma) return;
     const apiBase=import.meta.env.VITE_API_URL||'/api';
     const wsUrl=apiBase.replace(/\/api\/?$/,'')+'/ws-sgt';
     const client=new Client({
@@ -33,7 +32,7 @@ export default function ChatTurma() {
       onWebSocketError:()=>setErro('Não foi possível conectar ao chat da turma.')
     });
     clientRef.current=client;client.activate();
-    return ()=>{setConectado(false);client.deactivate();clientRef.current=null;};
+    return ()=>{client.deactivate();clientRef.current=null;};
   },[turma]);
 
   const enviar=e=>{
