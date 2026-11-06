@@ -8,6 +8,8 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
   const [turma, setTurma] = useState(usuario?.turma || '');
   const [avatarUrl, setAvatarUrl] = useState(usuario?.avatarUrl || '');
   const [corCapa, setCorCapa] = useState(usuario?.corCapa || '#075b70');
+  const [imagemCapa, setImagemCapa] = useState(usuario?.imagemCapa || '');
+  const inputCapaRef = useRef(null);
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -56,7 +58,7 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
     setSalvando(true);
     try {
       // Nome, turma e personalização são mantidos localmente até existir endpoint de perfil no backend.
-      const usuarioCompleto = { ...usuario, nome: nome.trim(), turma: turma.trim(), avatarUrl, corCapa };
+      const usuarioCompleto = { ...usuario, nome: nome.trim(), turma: turma.trim(), avatarUrl, corCapa, imagemCapa };
       try {
         localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
       } catch {
@@ -83,7 +85,7 @@ export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
       </header>
 
       <section className="profile-main-card">
-        <div className="profile-cover" style={{'--profile-cover-color':corCapa}} aria-hidden="true"><span>SGT</span></div>
+        <div className="profile-cover" style={{'--profile-cover-color':corCapa, ...(imagemCapa ? {backgroundImage: 'linear-gradient(90deg,rgba(3,20,30,.25),rgba(3,20,30,.25)),url(' + imagemCapa + ')'} : {})}}><span>SGT</span><button type="button" className="profile-cover-edit" onClick={() => inputCapaRef.current?.click()}>Alterar capa</button><input ref={inputCapaRef} className="profile-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(!file)return;if(file.size>2*1024*1024){setErro('A imagem de fundo deve ter no máximo 2 MB.');return;}const reader=new FileReader();reader.onload=()=>{setImagemCapa(reader.result);setMensagem('Prévia da imagem de fundo atualizada. Salve para manter.');};reader.readAsDataURL(file);}} /></div>
         <div className="profile-identity">
           <div className="profile-avatar-wrap">
             <div className="profile-avatar" style={{backgroundColor:corCapa}} aria-label={`Foto de perfil de ${nome || 'Usuário'}`}>
