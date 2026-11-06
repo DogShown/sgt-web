@@ -6066,3 +6066,29 @@ html[data-theme="escuro"] .profile-discord .profile-field input:disabled { backg
 @media (prefers-reduced-motion: reduce) {
   .dashboard-page,.tasks-page,.attendance-page,.notifications-page,.profile-page,.chat-page,.user-overview-page { animation:none; }
 }
+
+/* Refinos finais de navegação e autenticação */
+@media (max-width: 620px) {
+  .sidebar { position:sticky; }
+  .sidebar-footer { display:flex; position:absolute; top:9px; right:12px; gap:6px; padding:0; }
+  .sidebar-profile-button { width:36px; height:36px; justify-content:center; padding:0; }
+  .sidebar-avatar { width:32px; height:32px; min-width:32px; }
+  .sidebar-footer-actions .theme-toggle { width:36px; height:36px; min-height:36px; }
+  .sidebar-menu { padding-right:88px; }
+  .sidebar-user-copy,.sidebar-profile-chevron { display:none; }
+}
+.login-remember { display:flex; align-items:center; gap:8px; color:var(--theme-text-muted); font-size:.78rem; cursor:pointer; }
+.login-remember input { width:16px; height:16px; accent-color:var(--action-primary); }
+.auth-page { color:var(--theme-text); }
+.auth-form-panel { background:var(--theme-bg); }
+.auth-card { padding:clamp(20px,3vw,34px); border:1px solid var(--theme-border); border-radius:22px; background:var(--theme-surface); box-shadow:0 20px 55px var(--theme-shadow); }
+.auth-heading h1,.auth-heading h2 { color:var(--theme-text-strong); }
+.auth-heading p { color:var(--theme-text-muted); }
+.auth-form-panel .form-field > span { color:var(--theme-text-strong); }
+.auth-form-panel .form-field input { color:var(--theme-text); background:var(--theme-surface); border-color:var(--theme-border); }
+.auth-form-panel .auth-switch { color:var(--theme-text-muted); }
+.auth-form-panel .auth-switch button,.auth-form-panel .forgot-link,.auth-form-panel .back-link { color:var(--action-primary); }
+html[data-theme="escuro"] .auth-form-panel { background:#0d1b24; }
+html[data-theme="escuro"] .auth-card { background:var(--theme-surface); border-color:var(--theme-border); }
+html[data-theme="escuro"] .auth-form-panel .form-field input { background:#0b1922; color:var(--theme-text); }
+html[data-theme="escuro"] .auth-form-panel .form-message.success { color:#91e0c4; background:#12352f; border-color:#235b4e; }
