@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 import { pushService } from '../services/pushService';
+import LoadingFeedback from './LoadingFeedback';
 
 const STORAGE_KEY = 'sgt_notifications_read';
 
@@ -128,7 +129,7 @@ export default function Notificacoes() {
         </div>
       </header>
       <section className="notifications-list">
-        {carregando ? <div className="notifications-empty">Carregando notificações...</div> :
+        {carregando ? <LoadingFeedback variant="notifications" label="Carregando notificações" /> :
           erroCarregamento ? <div className="notifications-empty" role="alert"><h2>Não foi possível carregar</h2><p>{erroCarregamento}</p><button type="button" className="btn-outline" onClick={() => window.location.reload()}>Tentar novamente</button></div> :
           notificacoes.length === 0 ? <div className="notifications-empty"><span>✓</span><h2>Nenhuma notificação</h2><p>Quando houver uma tarefa próxima, atrasada ou concluída, ela aparecerá aqui.</p></div> :
           notificacoes.map(n => {
