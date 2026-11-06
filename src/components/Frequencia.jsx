@@ -30,7 +30,11 @@ export default function Frequencia() {
     catch (e) { setErro(e.response?.data?.message || 'Não foi possível carregar a frequência sincronizada.'); }
     finally { setLoading(false); }
   };
-  useEffect(() => {\n    // A consulta é assíncrona; os estados são atualizados após a resposta da API.\n    // eslint-disable-next-line react-hooks/set-state-in-effect\n    carregar();\n  }, []);
+  useEffect(() => {
+    // A consulta é assíncrona; os estados são atualizados após a resposta da API.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    carregar();
+  }, []);
 
   const faltas = registros.reduce((s,r)=>s+Number(r.quantidade||1),0);
   const percentual = Number(total)>0 ? faltas/Number(total)*100 : 0;
