@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { tarefaService } from '../services/tarefaService';
 import LoadingFeedback from './LoadingFeedback';
+import EditarTarefa from './EditarTarefa';
 
 const formatarData = (data) => {
   if (!data) return 'Sem prazo';
@@ -53,6 +54,7 @@ function GerenciadorTarefas() {
   const [sucesso, setSucesso] = useState('');
   const [criando, setCriando] = useState(false);
   const [tarefaEmOperacao, setTarefaEmOperacao] = useState(null);
+  const [editandoId, setEditandoId] = useState(null);
 
   const [titulo, setTitulo] = useState('');
   const [descricao, setDescricao] = useState('');
@@ -310,8 +312,9 @@ function GerenciadorTarefas() {
                                 <span className={`task-status-dot ${concluida ? 'concluida' : ''}`} aria-hidden="true" />
                                 <div><h3>{tarefa.titulo}</h3>{tarefa.descricao && <p>{tarefa.descricao}</p>}</div>
                               </div>
-                              <button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>×</button>
+                              <div className="task-actions"><button className="task-status-action" type="button" onClick={() => setEditandoId(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id}>Editar</button><button className="task-delete" type="button" onClick={() => handleDeletar(tarefa.id)} disabled={tarefaEmOperacao === tarefa.id} aria-label={`Excluir tarefa ${tarefa.titulo}`}>×</button></div>
                             </div>
+                            {editandoId === tarefa.id && <EditarTarefa tarefa={tarefa} onCancel={() => setEditandoId(null)} onSaved={() => { setEditandoId(null); setSucesso('Tarefa atualizada com sucesso.'); carregarTarefas(); }} />}
                             <div className="task-meta">
                               <span className="task-badge category">{labelCategoria[tarefa.categoria] || tarefa.categoria || 'Outras'}</span>
                               <span className={`task-badge priority-${prioridadeClass}`}>{labelPrioridade[tarefa.prioridade] || tarefa.prioridade || 'Média'}</span>
