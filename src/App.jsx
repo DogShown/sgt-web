@@ -204,6 +204,9 @@ function AppContent() {
 
   if (usuarioLogado) {
     return <Routes>
+      <Route path="/recuperar-senha" element={<ContaToken modo="recuperar" />} />
+      <Route path="/redefinir-senha" element={<ContaToken modo="redefinir" />} />
+      <Route path="/confirmar-email" element={<ContaToken modo="confirmar-email" />} />
       <Route path="/app/*" element={<PrivateLayout usuarioLogado={usuarioLogado} tema={tema} alternarTema={alternarTema} onUsuarioAtualizado={handleUsuarioAtualizado} onLogout={handleLogout} />} />
       <Route path="*" element={<Navigate to="/app/dashboard" replace />} />
     </Routes>;
