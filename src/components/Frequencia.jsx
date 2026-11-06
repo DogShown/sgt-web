@@ -46,7 +46,7 @@ export default function Frequencia() {
   const salvarConfig = e => {
     e.preventDefault();
     const nova={...config,limite:Number(limite),totalPrevisto:Number(total),unidade,disciplinasAtivas};
-    setConfig(nova);localStorage.setItem(CONFIG_KEY,JSON.stringify(nova));setAviso('Parâmetros de cálculo salvos neste dispositivo.');
+    setConfig(nova);localStorage.setItem(configKey,JSON.stringify(nova));setAviso('Parâmetros de cálculo salvos neste dispositivo.');
   };
   const adicionarMateria = () => {
     const nome=novaMateria.trim();if(!nome)return;
