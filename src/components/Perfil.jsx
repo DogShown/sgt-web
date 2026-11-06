@@ -3,10 +3,11 @@ import { perfilService } from '../services/perfilService';
 
 const MAX_AVATAR_SIZE = 2 * 1024 * 1024;
 
-export default function Perfil({ usuario, onUsuarioAtualizado }) {
+export default function Perfil({ usuario, onUsuarioAtualizado, onSair }) {
   const [nome, setNome] = useState(usuario?.nome || '');
   const [turma, setTurma] = useState(usuario?.turma || '');
   const [avatarUrl, setAvatarUrl] = useState(usuario?.avatarUrl || '');
+  const [corCapa, setCorCapa] = useState(usuario?.corCapa || '#075b70');
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
@@ -54,8 +55,8 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
     setMensagem('');
     setSalvando(true);
     try {
-      const atualizado = await perfilService.atualizar({ nome: nome.trim(), turma: turma.trim() });
-      const usuarioCompleto = { ...atualizado, avatarUrl };
+      // Nome, turma e personalização são mantidos localmente até existir endpoint de perfil no backend.
+      const usuarioCompleto = { ...usuario, nome: nome.trim(), turma: turma.trim(), avatarUrl, corCapa };
       try {
         localStorage.setItem('sgt_user', JSON.stringify(usuarioCompleto));
       } catch {
@@ -82,10 +83,10 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
       </header>
 
       <section className="profile-main-card">
-        <div className="profile-cover" aria-hidden="true"><span>SGT</span></div>
+        <div className="profile-cover" style={{'--profile-cover-color':corCapa}} aria-hidden="true"><span>SGT</span></div>
         <div className="profile-identity">
           <div className="profile-avatar-wrap">
-            <div className="profile-avatar" aria-label={`Foto de perfil de ${nome || 'Usuário'}`}>
+            <div className="profile-avatar" style={{backgroundColor:corCapa}} aria-label={`Foto de perfil de ${nome || 'Usuário'}`}>
               {avatarUrl ? <img src={avatarUrl} alt="" /> : iniciais}
             </div>
             <button type="button" className="profile-avatar-edit" onClick={() => inputFotoRef.current?.click()} aria-label="Alterar foto de perfil" title="Alterar foto">✎</button>
@@ -107,8 +108,9 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
             <label className="profile-field"><span>Nome completo</span><input type="text" value={nome} onChange={(event) => setNome(event.target.value)} required maxLength={100} placeholder="Digite seu nome completo" autoComplete="name" /></label>
             <label className="profile-field"><span>Nome de usuário</span><input type="text" value={usuario?.email || ''} disabled /><small>Seu e-mail é usado para entrar no SGT.</small></label>
             <label className="profile-field"><span>Turma</span><input type="text" value={turma} onChange={(event) => setTurma(event.target.value.toUpperCase())} placeholder="Ex.: INF3BM" required maxLength={50} autoComplete="organization" /><small>Curso, ano e período.</small></label>
+            <label className="profile-field"><span>Cor de fundo do perfil</span><input type="color" value={corCapa} onChange={e=>setCorCapa(e.target.value)} /></label>
             <div className="profile-field profile-account-type"><span>Tipo de conta</span><div className="profile-account-value"><span className="profile-account-dot" /> Conta pessoal</div></div>
-            <div className="profile-form-footer"><span>Foto armazenada neste navegador; sincronização entre dispositivos exige suporte no servidor.</span><button type="submit" className="profile-save-button" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'} <span aria-hidden="true">→</span></button></div>
+            <div className="profile-form-footer"><span>Foto e personalização ficam salvas neste navegador. A sincronização entre dispositivos será adicionada com suporte no servidor.</span><div className="profile-form-actions"><button type="button" className="btn-outline" onClick={onSair}>Sair da conta</button><button type="submit" className="profile-save-button" disabled={salvando}>{salvando ? 'Salvando...' : 'Salvar alterações'} <span aria-hidden="true">→</span></button></div></div>
           </form>
         </div>
       </section>
