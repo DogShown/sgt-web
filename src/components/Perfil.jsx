@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { perfilService } from '../services/perfilService';
 import logo from '../assets/logo.jpg';
 
-export default function Perfil({ usuario, onUsuarioAtualizado }) {
+export default function Perfil({ usuario, onUsuarioAtualizado, onContaExcluida }) {
   const [nome, setNome] = useState(usuario?.nome || '');
   const [turma, setTurma] = useState(usuario?.turma || '');
   const [salvando, setSalvando] = useState(false);
   const [mensagem, setMensagem] = useState('');
   const [erro, setErro] = useState('');
+  const [excluindo, setExcluindo] = useState(false);
 
   useEffect(() => {
     setNome(usuario?.nome || '');
@@ -28,6 +29,26 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
       setErro(error.response?.data?.message || 'Não foi possível atualizar seu perfil.');
     } finally {
       setSalvando(false);
+    }
+  };
+
+
+  const excluirConta = async () => {
+    const confirmado = window.confirm(
+      'Tem certeza de que deseja excluir sua conta? Essa ação é permanente e também removerá suas tarefas e inscrições de notificações.'
+    );
+    if (!confirmado) return;
+
+    setErro('');
+    setMensagem('');
+    setExcluindo(true);
+    try {
+      await perfilService.excluir();
+      onContaExcluida?.();
+    } catch (error) {
+      setErro(error.response?.data?.message || 'Não foi possível excluir sua conta. Verifique sua conexão e tente novamente.');
+    } finally {
+      setExcluindo(false);
     }
   };
 
@@ -195,6 +216,24 @@ export default function Perfil({ usuario, onUsuarioAtualizado }) {
             </form>
           </article>
 
+        </section>
+
+        <section className="bg-white border border-rose-200 rounded-2xl p-6 sm:p-8 shadow-sm">
+          <div className="max-w-3xl space-y-3">
+            <p className="text-xs font-bold uppercase tracking-wider text-rose-700">Zona de perigo</p>
+            <h2 className="text-lg font-bold text-slate-900">Excluir minha conta</h2>
+            <p className="text-sm text-slate-600">
+              A exclusão é permanente. Suas tarefas e inscrições de notificações vinculadas à conta também serão removidas.
+            </p>
+            <button
+              type="button"
+              onClick={excluirConta}
+              disabled={excluindo}
+              className="inline-flex items-center justify-center rounded-lg bg-rose-700 hover:bg-rose-800 disabled:bg-slate-300 disabled:cursor-not-allowed px-4 py-2.5 text-sm font-bold text-white transition-colors"
+            >
+              {excluindo ? 'Excluindo conta...' : 'Excluir minha conta'}
+            </button>
+          </div>
         </section>
       </div>
     </div>
