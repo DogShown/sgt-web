@@ -4,5 +4,8 @@ export const perfilService = {
   atualizar: async (dados) => {
     const response = await api.put('/auth/me', dados);
     return response.data;
+  },
+  excluir: async () => {
+    await api.delete('/conta');
   }
 };
