@@ -174,7 +174,7 @@ export default function App() {
               ? <GerenciadorTarefas />
               : abaAtiva === 'notificacoes'
                 ? <Notificacoes />
-                : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} />}
+                : <Perfil usuario={usuarioLogado} onUsuarioAtualizado={handleUsuarioAtualizado} onContaExcluida={handleLogout} />}
         </main>
       </div>
     </div>
